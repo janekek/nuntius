@@ -1,0 +1,86 @@
+{
+  "chats": [
+    {
+      "chatID": "chat_001",
+      "usernames": ["Janek", "admin"],
+      "messages": [
+        {
+          "sender": "admin",
+          "text": "Hallo! Willkommen in meinem neuen Messenger.",
+          "timestamp": "2026-03-16 12:00:00"
+        },
+        {
+          "sender": "gast",
+          "text": "Hey, danke! Sieht schon echt gut aus.",
+          "timestamp": "2026-03-16 12:05:22"
+        },
+        {
+          "sender": "Janek",
+          "text": "jo",
+          "timestamp": "2026-03-16 12:05:22"
+        },
+        {
+          "sender": "Janek",
+          "text": "Moin meistaa",
+          "timestamp": "2026-03-16 14:34:11"
+        },
+        {
+          "sender": "Janek",
+          "text": "tag",
+          "timestamp": "2026-03-16 20:11:31"
+        },
+        {
+          "sender": "Janek",
+          "text": "Hier haben wir mal eine ganz ganz lange Nachricht, um Zeilenumrüche darzustellen.",
+          "timestamp": "2026-03-16 20:11:32"
+        },
+        {
+          "sender": "Janek",
+          "text": "tag",
+          "timestamp": "2026-03-16 20:11:59"
+        },
+        {
+          "sender": "Janek",
+          "text": "tag",
+          "timestamp": "2026-03-16 20:12:04"
+        },
+        {
+          "sender": "Janek",
+          "text": "Dies ist eine Testnachricht!",
+          "timestamp": "2026-03-17 00:17:43"
+        },
+        {
+          "sender": "admin",
+          "text": "s",
+          "timestamp": "2026-03-22 00:05:57"
+        },
+        {
+          "sender": "admin",
+          "text": "Hi this is a test",
+          "timestamp": "2026-03-22 00:06:22"
+        },
+        {
+          "sender": "Janek",
+          "text": "G",
+          "timestamp": "2026-03-22 08:58:19"
+        }
+      ]
+    },
+    {
+      "chatID": "chat_002",
+      "usernames": ["admin", "entwickler_pro"],
+      "messages": [
+        {
+          "sender": "entwickler_pro",
+          "text": "Hast du die JSON-Struktur schon fertig?",
+          "timestamp": "2026-03-16 12:10:00"
+        },
+        {
+          "sender": "admin",
+          "text": "Ja, sie ist jetzt bereit f\u00fcr Python!",
+          "timestamp": "2026-03-16 12:12:45"
+        }
+      ]
+    }
+  ]
+}

@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./frontend/pages/login";
+import Chats from "./frontend/pages/chats";
+import ChatPage from "./frontend/pages/chatPage";
+import Logout from "./frontend/components/logout";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import "./frontend/styles/index.css";
+
+function About() {
+  return <h1>About</h1>;
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/chats/:chatID" element={<ChatPage />} />
+        <Route path="/logout" element={<Logout />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
