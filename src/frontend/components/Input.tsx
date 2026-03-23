@@ -10,7 +10,7 @@ export default function Input({
   type: string;
   placeholder: string;
   value: string;
-  onChange: Function;
+  onChange: React.ChangeEventHandler<HTMLInputElement, HTMLInputElement>;
 }) {
   return (
     <input

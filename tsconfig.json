@@ -29,6 +29,7 @@
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
+    "lib": ["es2015", "es2016", "dom", "es2018.promise"],
 
     // Style Options
     // "noImplicitReturns": true,

@@ -7,16 +7,9 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 import CorrectableInput from "../components/CorrectableInput";
 
-interface Message {
-  sender: string;
-  text: string;
-  timestamp: string;
-}
+import type { Chat } from "../types/chat";
 
-interface Chat {
-  chatID: string;
-  messages: Message[];
-}
+import { useCallAPI } from "../hooks/useCallAPI";
 
 const socket = io("http://localhost:5000", {
   withCredentials: true,
@@ -24,47 +17,45 @@ const socket = io("http://localhost:5000", {
 
 function ChatPage() {
   const { chatID } = useParams<{ chatID: string }>();
-  const [chat, setChat] = useState<Chat | null>(null);
   const [msg, setMsg] = useState("");
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/chats/${chatID}`, {
-      credentials: "include",
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setChat(data.chat);
-      });
-    socket.emit("join", { chatID });
-    socket.on("receiveMessage", (data) => {
-      console.log(chat);
-      setChat((prev) => {
-        if (!prev) return prev; // null check
+  const {
+    data: chatData,
+    loading,
+    error,
+  } = useCallAPI<{ chat: Chat }>(`http://localhost:5000/api/chats/${chatID}`, {
+    credentials: "include",
+  });
 
-        const newState: Chat = {
+  const [chat, setChat] = useState<Chat | null>(null);
+
+  useEffect(() => {
+    if (chatData?.chat) setChat(chatData.chat);
+  }, [chatData]);
+
+  useEffect(() => {
+    socket.emit("join", { chatID });
+
+    const handleMessage = (data: any) => {
+      setChat((prev) => {
+        if (!prev) return prev;
+        return {
           ...prev,
           messages: [...prev.messages, data],
         };
-
-        return newState;
       });
-    });
+    };
+
+    socket.on("receiveMessage", handleMessage);
 
     return () => {
-      socket.off("receiveMessage");
+      socket.off("receiveMessage", handleMessage);
     };
   }, [chatID]);
 
-  function submitChat() {
-    if (!msg.trim()) return;
-
-    const messageData = { chatID, msg };
-    socket.emit("sendMessage", messageData);
-    setMsg("");
-  }
-
-  if (!chat) return <div>Lädt...</div>;
+  if (loading) return <div>Lädt...</div>;
+  if (error) return <div>Fehler: {error}</div>;
+  if (!chat) return <div>Kein Chat geladen</div>;
 
   return (
     <>
@@ -110,6 +101,14 @@ function ChatPage() {
       />
     </>
   );
+
+  function submitChat() {
+    if (!msg.trim()) return;
+
+    const messageData = { chatID, msg };
+    socket.emit("sendMessage", messageData);
+    setMsg("");
+  }
 }
 
 export default ChatPage;
