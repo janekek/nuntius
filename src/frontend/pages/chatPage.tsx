@@ -7,13 +7,24 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 import CorrectableInput from "../components/CorrectableInput";
 
+interface Message {
+  sender: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Chat {
+  chatID: string;
+  messages: Message[];
+}
+
 const socket = io("http://localhost:5000", {
   withCredentials: true,
 });
 
 function ChatPage() {
-  const { chatID } = useParams();
-  const [chat, setChat] = useState(null);
+  const { chatID } = useParams<{ chatID: string }>();
+  const [chat, setChat] = useState<Chat | null>(null);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -29,11 +40,13 @@ function ChatPage() {
     socket.on("receiveMessage", (data) => {
       console.log(chat);
       setChat((prev) => {
-        const newState = {
+        if (!prev) return prev; // null check
+
+        const newState: Chat = {
           ...prev,
-          messages: [...(prev?.messages || []), data],
+          messages: [...prev.messages, data],
         };
-        console.log("neu", newState);
+
         return newState;
       });
     });
@@ -80,11 +93,12 @@ function ChatPage() {
             <VerticalSpace height={"20px"} />
 
             <CorrectableInput
-              id="msg"
               placeholder="Chatte hier..."
               type="text"
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
+              msg="text"
+              displayMsg={false}
             />
             <VerticalSpace height={"20px"} />
             <button onClick={submitChat}>Chat</button>

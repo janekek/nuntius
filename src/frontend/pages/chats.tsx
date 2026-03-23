@@ -5,6 +5,7 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 
 import styles from "../styles/chats.module.css";
+import type { Chat } from "../types/chat";
 
 export default function () {
   const [username, setUsername] = useState(null);
@@ -48,7 +49,7 @@ export default function () {
             <VerticalSpace height="20px" />
 
             <ul className={styles.ul}>
-              {chats.map((chat) => (
+              {chats.map((chat: Chat) => (
                 <li key={chat.chatID} className={styles.li}>
                   <p className={styles.chatID}>Chat ID: {chat.chatID}</p>
                   Teilnehmer: {chat.usernames.join(", ")}
