@@ -10,6 +10,8 @@ import CorrectableInput from "../components/CorrectableInput";
 import type { Chat } from "../types/chat";
 
 import { useCallAPI } from "../hooks/useCallAPI";
+import type { ChatPackage } from "../types/ServerResponse";
+import LoadingPage from "./LoadingPage";
 
 const socket = io("http://localhost:5000", {
   withCredentials: true,
@@ -17,21 +19,22 @@ const socket = io("http://localhost:5000", {
 
 function ChatPage() {
   const { chatID } = useParams<{ chatID: string }>();
-  const [msg, setMsg] = useState("");
+  const [userInputMsg, setUserInputMsg] = useState("");
 
-  const {
-    data: chatData,
-    loading,
-    error,
-  } = useCallAPI<{ chat: Chat }>(`http://localhost:5000/api/chats/${chatID}`, {
-    credentials: "include",
-  });
+  const { response, loading, error } = useCallAPI<ChatPackage>(
+    `http://localhost:5000/api/chats/${chatID}`,
+    {
+      credentials: "include",
+    },
+  );
 
   const [chat, setChat] = useState<Chat | null>(null);
 
   useEffect(() => {
-    if (chatData?.chat) setChat(chatData.chat);
-  }, [chatData]);
+    if (response?.content.chat) {
+      setChat(response.content.chat);
+    }
+  }, [response?.content.chat]);
 
   useEffect(() => {
     socket.emit("join", { chatID });
@@ -53,7 +56,7 @@ function ChatPage() {
     };
   }, [chatID]);
 
-  if (loading) return <div>Lädt...</div>;
+  if (loading) return <LoadingPage />;
   if (error) return <div>Fehler: {error}</div>;
   if (!chat) return <div>Kein Chat geladen</div>;
 
@@ -86,8 +89,8 @@ function ChatPage() {
             <CorrectableInput
               placeholder="Chatte hier..."
               type="text"
-              value={msg}
-              onChange={(e) => setMsg(e.target.value)}
+              value={userInputMsg}
+              onChange={(e) => setUserInputMsg(e.target.value)}
               msg="text"
               displayMsg={false}
             />
@@ -103,11 +106,11 @@ function ChatPage() {
   );
 
   function submitChat() {
-    if (!msg.trim()) return;
+    if (!userInputMsg.trim()) return;
 
-    const messageData = { chatID, msg };
+    const messageData = { chatID, msg: userInputMsg };
     socket.emit("sendMessage", messageData);
-    setMsg("");
+    setUserInputMsg("");
   }
 }
 

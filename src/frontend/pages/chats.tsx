@@ -6,37 +6,30 @@ import VerticalSpace from "../components/VerticalSpace";
 
 import styles from "../styles/chats.module.css";
 import type { Chat } from "../types/chat";
+import { useCallAPI } from "../hooks/useCallAPI";
+import type { ChatsPackage } from "../types/ServerResponse";
 
 export default function () {
   const [username, setUsername] = useState(null);
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<Chat[]>([]);
   const navigate = useNavigate();
 
+  const { response, error, loading } = useCallAPI<ChatsPackage>(
+    "http://localhost:5000/api/chats",
+    {
+      credentials: "include",
+    },
+  );
+
   useEffect(() => {
-    fetch("http://localhost:5000/api/checkSession", {
-      credentials: "include",
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.loggedIn) {
-          navigate("/");
-        } else {
-          setUsername(data.username);
-        }
-      })
-      .catch((err) => console.error(err));
+    console.log(response);
+    if (response?.status === 201) {
+      navigate("/");
+    } else if (response?.status === 100) {
+      setChats(response.content.chats);
+    }
+  }, [response]);
 
-    fetch("http://localhost:5000/api/chats", {
-      credentials: "include",
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => setChats(data.chats))
-      .catch((err) => console.error(err));
-  }, [navigate]);
-
-  if (!username) return <div>Loading...</div>;
   return (
     <>
       <CenteredVertically

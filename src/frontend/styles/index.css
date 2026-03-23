@@ -23,3 +23,7 @@ h1 {
   font-family: "Code";
   src: url(../fonts/SourceCodePro-Regular.ttf);
 }
+
+:root {
+  --col-warning: rgb(190, 21, 21);
+}

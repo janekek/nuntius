@@ -1,21 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { ServerResponse } from "../types/ServerResponse";
 
-export function useCallAPI<T>(url: string, options?: RequestInit) {
-  const [data, setData] = useState<T | null>(null);
+export function useCallAPI<T>(url?: string, options?: RequestInit) {
+  const [response, setResponse] = useState<ServerResponse<T> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const execute = useCallback(async (url: string, options?: RequestInit) => {
     setLoading(true);
-    fetch(url, options)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        return res.json();
-      })
-      .then((json: T) => setData(json))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [url, JSON.stringify(options)]);
+    setError(null);
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      const json: ServerResponse<T> = await res.json();
+      setResponse(json);
+      return json;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  return { data, loading, error };
+  useEffect(() => {
+    if (url) {
+      execute(url, options);
+    }
+  }, [url, JSON.stringify(options), execute]);
+
+  // useEffect(() => {
+  //   setLoading(true);
+  //   fetch(url, options)
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+  //       return res.json();
+  //     })
+  //     .then((json: ServerResponse<T>) => {
+  //       setResponse(json);
+  //     })
+  //     .catch((err) => setError(err.message))
+  //     .finally(() => setLoading(false));
+  // }, [url, JSON.stringify(options)]);
+
+  return { response, loading, error, execute };
 }

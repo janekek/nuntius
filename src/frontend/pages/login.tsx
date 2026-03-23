@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import CorrectableInput from "../components/CorrectableInput";
 import CustomButton from "../components/CustomButton";
 import VerticalSpace from "../components/VerticalSpace";
 import CenteredVertically from "../components/CenteredVertically";
+import { useCallAPI } from "../hooks/useCallAPI";
+import type { LoginPackage } from "../types/ServerResponse";
+import LoadingPage from "./LoadingPage";
 
 export default function () {
   const [username, setUsername] = useState("");
@@ -13,6 +16,19 @@ export default function () {
   const [sendPasswordError, setSendPasswordError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+
+  const { response, loading, execute } = useCallAPI<LoginPackage>();
+
+  useEffect(() => {
+    if (response?.status === 100) {
+      navigate("/chats");
+    } else if (response?.status === 301) {
+      setPassword("");
+      setErrorMsg("Username oder password falsch");
+    } else {
+      console.log("An error occurred.");
+    }
+  }, [response]);
 
   function sendRequest() {
     const usernameError = username.trim() === "";
@@ -24,26 +40,15 @@ export default function () {
     if (usernameError || passwordError) {
       return;
     }
-    fetch("http://localhost:5000/api/login", {
+
+    execute("http://localhost:5000/api/login", {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const response = data.status;
-        if (response === 100) {
-          navigate("/chats");
-        } else if (response === 301) {
-          setErrorMsg("Username oder password falsch");
-        } else {
-          console.log("An error occurred.");
-        }
-      })
-      .catch((error) => console.error(error));
+    });
   }
 
   return (
