@@ -1,0 +1,5 @@
+{
+  "ignore": ["sessions/*", "chats.json", "users.json", "node_modules"],
+  "watch": ["src"],
+  "ext": "ts,js,json"
+}

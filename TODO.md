@@ -1,0 +1,3 @@
+- use another encryting algorithm (sha is too fast)
+- Soll ich dir zeigen, wie du eine Middleware schreibst, die bei jeder Anfrage prüft, ob die Session noch aktiv ist, bevor eine Route (z.B. /api/chat) ausgeführt wird?
+- types/session.d.ts global machen?
