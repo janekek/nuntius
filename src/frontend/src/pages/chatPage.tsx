@@ -7,12 +7,11 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 import CorrectableInput from "../components/CorrectableInput";
 
-import type { Chat } from "../types/chat";
-
 import { useCallAPI } from "../hooks/useCallAPI";
 import type { ChatPackage } from "../shared/ServerResponse";
 import LoadingPage from "./LoadingPage";
 import { Status } from "../shared/Status";
+import type { FullChat } from "../shared/types";
 
 const socket = io("http://localhost:5000", {
   withCredentials: true,
@@ -20,7 +19,11 @@ const socket = io("http://localhost:5000", {
 
 function ChatPage() {
   const { chatID } = useParams<{ chatID: string }>();
+
   const [userInputMsg, setUserInputMsg] = useState("");
+  const [chat, setChat] = useState<FullChat | null>(null);
+
+  const navigate = useNavigate();
 
   const { response, loading, error } = useCallAPI<ChatPackage>(
     `api/chat/${chatID}`,
@@ -30,13 +33,11 @@ function ChatPage() {
     },
   );
 
-  const [chat, setChat] = useState<Chat | null>(null);
-  const navigate = useNavigate();
-
   useEffect(() => {
+    if (!response) return;
     switch (response?.status.code) {
       case Status.OK.code:
-        setChat(response.content.chat);
+        setChat(response.content.fullChat);
         break;
       case Status.USER_NOT_LOGGED_IN.code:
         navigate("/");
@@ -55,7 +56,7 @@ function ChatPage() {
         if (!prev) return prev;
         return {
           ...prev,
-          messages: [...prev.messages, data],
+          messages: [...prev.messages, data.message],
         };
       });
     };
@@ -78,14 +79,14 @@ function ChatPage() {
           <>
             <VerticalSpace height={"50px"} />
             <h1 style={{ display: "flex", flexFlow: "row" }}>
-              Chat: <pre id="chatID"> {chat.chatID}</pre>
+              Chat: <pre id="chatID"> {chat.chat_id}</pre>
             </h1>
 
             <div className={styles.chatBox} id="chat-box">
               {chat.messages.map((m, i) => (
                 <div key={i} className={styles.message}>
                   <div>
-                    <strong>{m.sender}:</strong> {m.text}
+                    <strong>{m.sender_username}:</strong> {m.content}
                   </div>
 
                   <div style={{ fontSize: "0.7em", color: "gray" }}>

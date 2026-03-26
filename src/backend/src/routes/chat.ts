@@ -1,30 +1,27 @@
 import { Request, Response } from "express";
-// Angenommen, getChats ist in deiner chats.ts exportiert
-import { getChats } from "./chats";
 import { Status } from "../../../frontend/src/shared/Status";
+import { getFullChat } from "../../database/databaseOperations";
+import { generateResponse } from "../../../frontend/src/shared/ServerResponse";
 
 export async function handleSingleChat(req: Request, res: Response) {
   const currentUser = req.session.username;
-  const chatID = req.params.chatID;
+  const chat_id = req.params.chatID;
 
-  const allChats = await getChats();
-  const chat = allChats.find((c) => c.chatID === chatID);
+  const isNumber = (s: string): boolean =>
+    s.trim() !== "" && !Number.isNaN(Number(s));
 
-  if (!chat) {
-    return res.json({ status: Status.CHAT_NOT_FOUND });
+  if (Array.isArray(chat_id)) {
+    return generateResponse<string>(res, Status.ERROR, "Invalid input");
+  }
+  if (!isNumber(chat_id)) {
+    return generateResponse<string>(
+      res,
+      Status.ERROR,
+      "chat_id is not a number",
+    );
   }
 
-  if (!chat.usernames.includes(currentUser)) {
-    return res.json({
-      status: Status.USER_NOT_PART_OF_CHAT,
-    });
-  }
+  const fullChat = getFullChat(Number(chat_id));
 
-  return res.json({
-    status: Status.OK,
-    content: {
-      username: currentUser,
-      chat: chat,
-    },
-  });
+  return generateResponse(res, Status.OK, { username: currentUser, fullChat });
 }

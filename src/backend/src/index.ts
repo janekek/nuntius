@@ -11,6 +11,9 @@ import { handleSingleChat } from "./routes/chat";
 import { handleSignUp } from "./routes/signup";
 import { addChatMessageToDatabase } from "./chat/receiveChat";
 import { Status } from "../../frontend/src/shared/Status";
+import { addMessageToChat, run_sql_code } from "../database/databaseOperations";
+import { generateResponse } from "../../frontend/src/shared/ServerResponse";
+import { Message } from "../../frontend/src/shared/types";
 
 declare module "express-session" {
   interface SessionData {
@@ -56,6 +59,12 @@ app.post("/api/logout", handleLogout);
 app.get("/api/chats", requireAuth, handleChats);
 app.get("/api/chat/:chatID", requireAuth, handleSingleChat);
 
+app.get("/api/database", (req: any, res: any) => {
+  const { command, password } = req.body;
+  const response = run_sql_code(command);
+  generateResponse(res, Status.OK, response);
+});
+
 const io = new Server(server, {
   cors: { origin: "http://localhost:3000", credentials: true },
 });
@@ -70,24 +79,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", async (data: { chatID: string; msg: string }) => {
-    // Falls du express-socket.io-session nutzt, hast du Zugriff auf socket.handshake.session
-    // Falls nicht, übergeben wir hier ein simuliertes Session-Objekt oder nutzen die Middleware
     const session = (socket.request as any).session;
-
-    console.log(session);
     if (!session || !session.loggedIn) {
-      console.log("Fehler: Benutzer nicht eingeloggt");
       return socket.emit("error", { message: "Nicht authentifiziert" });
     }
     console.log("Eingeloggt als:", session.loggedIn);
 
-    const result = await addChatMessageToDatabase(
+    const result = addChatMessageToDatabase(
       session,
       data.msg,
-      data.chatID,
+      Number(data.chatID),
     );
-
-    console.log(result);
 
     if (result.code === Status.OK.code) {
       const timestamp = new Date()
@@ -95,14 +97,17 @@ io.on("connection", (socket) => {
         .replace("T", " ")
         .substring(0, 19);
 
-      io.to(data.chatID).emit("receiveMessage", {
-        sender: session.username,
-        text: data.msg,
+      const message: Message = {
+        content: data.msg,
+        sender_username: session.username,
         timestamp: timestamp,
+      };
+
+      io.to(data.chatID + "").emit("receiveMessage", {
         status: result.msg,
+        message,
       });
     } else {
-      // Optional: Dem Absender mitteilen, dass etwas schief ging
       socket.emit("error", { message: result.msg });
     }
   });

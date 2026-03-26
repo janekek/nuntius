@@ -1,7 +1,7 @@
-POST http://localhost:5000/api/login
+GET http://localhost:5000/api/database
 Content-Type: application/json
 
 {
-    "username": "Janek",
+    "command": "SELECT * FROM chat_participants",
     "password": "123"
 }

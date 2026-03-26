@@ -1,9 +1,18 @@
 import type { Response } from "express";
-import type { Chat } from "../types/chat";
+import { json } from "node:stream/consumers";
+import type { FullChat } from "./types";
 
 export default interface ServerResponse<T> {
   status: Status;
   content: T;
+}
+
+export function generateResponse<T>(
+  res: any,
+  status: Status,
+  content: T,
+): ServerResponse<T> {
+  return res.json({ status, content } as ServerResponse<T>);
 }
 
 export function sendResponse<T>(res: any, status: Status, content: T) {
@@ -22,12 +31,12 @@ export interface Status {
 //ResponseTypes
 export interface ChatPackage {
   username: string;
-  chat: Chat;
+  fullChat: FullChat;
 }
 
 export interface ChatsPackage {
   username: string;
-  chats: Chat[];
+  chats: FullChat[];
 }
 
 export interface LoginPackage {}

@@ -5,15 +5,14 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 
 import styles from "../styles/chats.module.css";
-import type { Chat } from "../types/chat";
 import { useCallAPI } from "../hooks/useCallAPI";
 import type { ChatsPackage } from "../shared/ServerResponse";
-import CorrectableInput from "../components/CorrectableInput";
 import Input from "../components/Input";
+import type { FullChat } from "../shared/types";
 
 export default function () {
   const [username, setUsername] = useState<string>("");
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState<FullChat[]>([]);
   const navigate = useNavigate();
 
   const [searchUsernameText, setSearchUsernameText] = useState<string>("");
@@ -47,12 +46,12 @@ export default function () {
             <VerticalSpace height="20px" />
 
             <ul className={styles.ul}>
-              {chats.map((chat: Chat) => (
-                <li key={chat.chatID} className={styles.li}>
-                  <p className={styles.chatID}>Chat ID: {chat.chatID}</p>
-                  Teilnehmer: {chat.usernames.join(", ")}
+              {chats.map((chat: FullChat) => (
+                <li key={chat.chat_id} className={styles.li}>
+                  <p className={styles.chatID}>Chat ID: {chat.chat_id}</p>
+                  Teilnehmer: {chat.participants.join(", ")}
                   <br />
-                  <a className={styles.link} href={`/chats/${chat.chatID}`}>
+                  <a className={styles.link} href={`/chats/${chat.chat_id}`}>
                     Chat öffnen
                   </a>
                 </li>
@@ -81,7 +80,7 @@ export default function () {
                 gap={5}
                 content={
                   <>
-                    <p>Frank</p>
+                    <p>ff</p>
                     <p>Klaus</p>
                   </>
                 }

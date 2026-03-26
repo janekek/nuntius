@@ -3,29 +3,27 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { Status } from "../../../frontend/src/shared/Status";
-import ServerResponse, {
+import {
+  generateResponse,
   sendResponse,
 } from "../../../frontend/src/shared/ServerResponse";
+import { createUser, isUsernameTaken } from "../../database/databaseOperations";
+import { EnhancedUser } from "../../../frontend/src/shared/types";
 
 export async function handleSignUp(req: Request, res: Response) {
   if (req.session.loggedIn) {
-    return res.json(Status.USER_LOGGED_IN);
+    return sendResponse<String>(res, Status.USER_LOGGED_IN, "");
   }
 
   const { username, password, password2 } = req.body;
-  const usersPath = path.join(__dirname, "../../database/users.json");
 
   try {
-    const fileData = await fs.readFile(usersPath, "utf-8");
-    const users: any[] = JSON.parse(fileData);
-
-    const userExists = users.some((u) => u.username === username);
-    if (userExists) {
-      return sendResponse<String>(res, Status.USERNAME_TAKEN, "");
-    }
-
     if (!username || username.length <= 3) {
       return sendResponse<String>(res, Status.USERNAME_TOO_SHORT, "");
+    }
+
+    if (isUsernameTaken(username)) {
+      return sendResponse<String>(res, Status.USERNAME_TAKEN, "");
     }
 
     if (password === password2) {
@@ -37,18 +35,16 @@ export async function handleSignUp(req: Request, res: Response) {
       .update(password)
       .digest("hex");
 
-    const newUser = {
+    const user: EnhancedUser = {
       username: username,
-      password: hashedPassword,
+      password_hash: hashedPassword,
+      public_key: "",
     };
 
-    users.push(newUser);
-
-    await fs.writeFile(usersPath, JSON.stringify(users, null, 4), "utf-8");
-
-    return sendResponse<String>(res, Status.OK, "");
+    createUser(user);
+    return generateResponse(res, Status.OK, "");
   } catch (error) {
     console.error("Signup Fehler:", error);
-    return sendResponse<String>(res, Status.ERROR, "");
+    return generateResponse(res, Status.ERROR, "");
   }
 }
