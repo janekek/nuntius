@@ -1,62 +1,57 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CenteredVertically from "../components/CenteredVertically";
 import CorrectableInput from "../components/CorrectableInput";
 import CustomButton from "../components/CustomButton";
 import VerticalSpace from "../components/VerticalSpace";
 
 import styles from "../styles/signUpPage.module.css";
-import type { LoginPackage } from "../shared/ServerResponse";
-import { useCallAPI } from "../hooks/useCallAPI";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { callAPI } from "../utils/apiClient";
+import type ServerResponse from "../shared/ServerResponse";
+import { SignupSchema } from "../shared/schemas";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
-  const [sendUsernameError, setSendUsernameError] = useState(false);
-  const [sendPasswordError, setSendPasswordError] = useState(false);
-  const [sendPassword2Error, setSendPassword2Error] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+
+  const [showAllErrors, setShowAllErrors] = useState(false);
+  const [serverErrorMsg, setServerErrorMsg] = useState("");
 
   const navigate = useNavigate();
 
-  const { response, loading, execute } = useCallAPI<LoginPackage>();
+  const mutation = useMutation({
+    mutationFn: async (): Promise<ServerResponse<String>> =>
+      callAPI("/signup", {
+        method: "POST",
+        body: JSON.stringify({ username, password, password2 }),
+      }),
 
-  function signUp() {
-    const usernameError = username.trim() === "";
-    const passwordError = password.trim() === "";
-    const password2Error = password2.trim() === "";
+    onSuccess: (response: ServerResponse<String>) => {
+      console.log(response);
+      if (response?.status.code !== 100) {
+        setServerErrorMsg(response?.status.msg + "");
+        setPassword("");
+        setPassword2("");
+      } else {
+        navigate("/");
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
 
-    setSendUsernameError(usernameError);
-    setSendPasswordError(passwordError);
-    setSendPassword2Error(password2Error);
-
-    if (usernameError || passwordError || password2Error) {
+  const handleSignUp = () => {
+    setServerErrorMsg("");
+    const result = SignupSchema.safeParse({ username, password, password2 });
+    if (!result.success) {
+      setShowAllErrors(true);
       return;
     }
-
-    execute("api/signup", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password, password2 }),
-    });
-  }
-
-  useEffect(() => {
-    console.log(response);
-    if (!response) return;
-    if (response?.status.code !== 100) {
-      setErrorMsg(response?.status.msg + "");
-      setPassword("");
-      setPassword2("");
-    } else {
-      navigate("/");
-    }
-    console.log(response);
-  }, [response]);
+    mutation.mutate();
+  };
 
   return (
     <>
@@ -92,59 +87,47 @@ export default function SignUpPage() {
                       feature can be disabled for selected chats.
                     </p>
                     <VerticalSpace height="40px" />
+
                     <CorrectableInput
-                      displayMsg={sendUsernameError}
-                      msg="Enter a username"
-                      onChange={(e) => {
-                        setUsername(e.target.value);
-                        setErrorMsg("");
-                        if (e.target.value.trim() !== "") {
-                          setSendUsernameError(false);
-                        }
-                      }}
-                      placeholder="Your username"
                       type="text"
+                      placeholder="Username"
                       value={username}
+                      onChange={setUsername}
+                      schema={SignupSchema.shape.username}
+                      forceShowError={showAllErrors}
                     />
+
                     <VerticalSpace height="10px" />
+
                     <CorrectableInput
-                      displayMsg={sendPasswordError}
-                      msg="Enter a log in password"
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setErrorMsg("");
-                        if (e.target.value.trim() !== "") {
-                          setSendPasswordError(false);
-                        }
-                      }}
-                      placeholder="Your password to log in"
-                      type="text"
+                      type="password"
+                      placeholder="Password"
                       value={password}
+                      onChange={setPassword}
+                      schema={SignupSchema.shape.password}
+                      forceShowError={showAllErrors}
                     />
+
                     <VerticalSpace height="10px" />
+
                     <CorrectableInput
-                      displayMsg={sendPassword2Error}
-                      msg="Enter a private password"
-                      onChange={(e) => {
-                        setPassword2(e.target.value);
-                        setErrorMsg("");
-                        if (e.target.value.trim() !== "") {
-                          setSendPassword2Error(false);
-                        }
-                      }}
-                      placeholder="Your secret password"
-                      type="text"
+                      type="password"
+                      placeholder="Password2"
                       value={password2}
+                      onChange={setPassword2}
+                      schema={SignupSchema.shape.password2}
+                      forceShowError={showAllErrors}
                     />
-                    {errorMsg && (
+
+                    {serverErrorMsg && (
                       <>
                         <VerticalSpace height={"10px"} />
-                        <p className={styles.warning}>{errorMsg}</p>
+                        <p className={styles.warning}>{serverErrorMsg}</p>
                       </>
                     )}
 
                     <VerticalSpace height={"30px"} />
-                    <CustomButton text="Sign up" onClick={signUp} />
+                    <CustomButton text="Sign up" onClick={handleSignUp} />
                     <VerticalSpace height="30px" />
                     <a href="/">Log in here.</a>
                   </>

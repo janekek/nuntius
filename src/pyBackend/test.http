@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/database
+Content-Type: application/json
+
+{
+    "command": "INSERT INTO chat_participants (chat_id, username) VALUES (1, 'Timon')",
+    "password": "123"
+}

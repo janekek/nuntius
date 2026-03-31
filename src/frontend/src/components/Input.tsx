@@ -7,6 +7,7 @@ type CustomInputProps = {
   value: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  onBlur?: React.ChangeEventHandler<HTMLInputElement>;
 };
 
 export default function Input({
@@ -15,6 +16,7 @@ export default function Input({
   value,
   onChange,
   onKeyDown,
+  onBlur,
 }: CustomInputProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
@@ -30,6 +32,7 @@ export default function Input({
       value={value}
       onChange={onChange}
       onKeyDown={handleKeyDown}
+      onBlur={onBlur}
     />
   );
 }

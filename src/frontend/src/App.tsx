@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/login";
+import Login from "./pages/loginPage";
 import Chats from "./pages/chats";
 import ChatPage from "./pages/chatPage";
 import Logout from "./components/logout";

@@ -1,3 +1,13 @@
 - use another encryting algorithm (sha is too fast), bcrypt
-- Soll ich dir zeigen, wie du eine Middleware schreibst, die bei jeder Anfrage prüft, ob die Session noch aktiv ist, bevor eine Route (z.B. /api/chat) ausgeführt wird?
 - types/session.d.ts global machen?
+- [FIND_ICH_OVERKILL]tailwind
+- [INFO] callAPIHook >> geändert
+- enum TRANS
+- [DONE] AI implement
+- [DONE] backend in python
+- [INFO] react router, frontend -> createBrowserRouter, es wird parallel zum Laden der Website eine Funktion gecallt, die resourcenintensive Prozesse druchführt (fetching). Damit verhinder man Data-Waterfall durch z.b. useEffect()
+- [DONE] tanstack query, frontend
+- [DONE] zod (erkenne links in chats), frontend
+- erkenne links in chats
+
+- jwt token, backend

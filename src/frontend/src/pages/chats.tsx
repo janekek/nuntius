@@ -5,10 +5,12 @@ import CenteredVertically from "../components/CenteredVertically";
 import VerticalSpace from "../components/VerticalSpace";
 
 import styles from "../styles/chats.module.css";
-import { useCallAPI } from "../hooks/useCallAPI";
 import type { ChatsPackage } from "../shared/ServerResponse";
 import Input from "../components/Input";
 import type { FullChat } from "../shared/types";
+import { callAPI } from "../utils/apiClient";
+import { useQuery } from "@tanstack/react-query";
+import type ServerResponse from "../shared/ServerResponse";
 
 export default function () {
   const [username, setUsername] = useState<string>("");
@@ -19,20 +21,24 @@ export default function () {
   const [sendSearchUsernameText, setSendSearchUsernameText] =
     useState<boolean>(false);
 
-  const { response, error, loading } = useCallAPI<ChatsPackage>("api/chats", {
-    credentials: "include",
-    method: "GET",
+  const { data, isSuccess } = useQuery<ServerResponse<ChatsPackage>>({
+    queryKey: ["page-chats", username],
+    queryFn: () =>
+      callAPI("/chats", {
+        method: "GET",
+      }),
   });
 
   useEffect(() => {
-    console.log(response);
-    if (response?.status.code === 201) {
-      navigate("/");
-    } else if (response?.status.code === 100) {
-      setChats(response.content.chats);
-      setUsername(response.content.username);
+    if (isSuccess && data) {
+      if (data?.status.code === 201) {
+        navigate("/");
+      } else if (data?.status.code === 100) {
+        setChats(data.content.chats);
+        setUsername(data.content.username);
+      }
     }
-  }, [response]);
+  }, [isSuccess, data]);
 
   return (
     <>
