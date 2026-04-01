@@ -1,0 +1,226 @@
+/* Globale Variablen & Basis */
+.pageContainer {
+  --bg-dark-surface: #1a1a1c;
+  --text-main: #f0f6fc;
+  --text-muted: #d2d5d8;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+
+  background-color: var(--bg-dark-main);
+  color: var(--text-main);
+  min-height: calc(100vh - 70px);
+  padding: 1rem 1rem 4rem 1rem;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+/* Zentrales Dashboard-Layout */
+.dashboard {
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--bg-dark-surface);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Header */
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.highlight {
+  color: var(--col-primary-accent);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.section {
+  width: 400px;
+}
+
+/* Sektionen */
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.emptyState {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+/* Chat Karten */
+.chatList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chatCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(
+    27,
+    48,
+    60,
+    0.4
+  ); /* Nutzt dein --col-primary als transparenten HG */
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-main);
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.chatCard:hover {
+  background-color: var(--col-primary);
+  transform: translateY(-2px);
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.chatInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chatDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.participantsName {
+  font-weight: 500;
+  font-size: 1.05rem;
+}
+
+.chatIdLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.chatAction {
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+/* Avatare */
+.avatarGroup {
+  display: flex;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--col-secondary); /* Akzentfarbe für Avatare */
+  color: #000;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border: 2px solid var(--bg-dark-surface);
+  margin-left: -10px;
+}
+
+.avatarGroup .avatar:first-child {
+  margin-left: 0;
+  background-color: var(--col-primary-accent);
+}
+
+/* Suche & Ergebnisse */
+.searchContainer {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.resultMeta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.matchCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+.matchInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.matchInfo .avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 0.9rem;
+  margin: 0;
+  background-color: var(--col-primary);
+  color: var(--text-main);
+  border: none;
+}
+
+.actionButton {
+  background-color: transparent;
+  color: var(--col-secondary);
+  border: 1px solid var(--col-secondary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+}
+
+.actionButton:hover {
+  background-color: var(--col-secondary);
+  color: #000;
+}

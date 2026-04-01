@@ -1,0 +1,100 @@
+/* Globale Variablen & Basis */
+.pageContainer {
+  background-color: var(--bg-dark-main);
+  color: var(--text-main);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Zentriert die Karte vertikal */
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  padding: 1rem;
+}
+
+/* Die Login Karte */
+.loginCard {
+  width: 100%;
+  max-width: 420px; /* Schön schmal für ein Login-Formular */
+  background-color: var(--bg-dark-surface);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Header Bereich */
+.header {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  color: var(--col-primary-accent);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Formular Bereich */
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Fehleranzeige */
+
+/* Aktionen (Login Button) */
+.actionArea {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+/* Footer (Sign Up Link) */
+.footer {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.signupText {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.signupLink {
+  color: var(--col-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.signupLink:hover {
+  color: #79e334; /* Helleres Grün */
+  text-decoration: underline;
+}

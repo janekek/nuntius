@@ -1,13 +1,11 @@
 .logo {
   font-family: "Warzone", sans-serif;
-  font-size: 30px;
   background-image: linear-gradient(316deg, #0095ffff 3%, #4bd04dff 100%);
   color: transparent;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.container {
-  width: 100%;
-  background-color: var(--col-primary);
+  transition: transform 0.25s ease;
+  will-change: transform;
+  user-select: none;
+  display: inline-block;
 }

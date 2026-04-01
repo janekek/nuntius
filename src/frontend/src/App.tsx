@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/loginPage";
-import Chats from "./pages/chats";
-import ChatPage from "./pages/chatPage";
+import Login from "./pages/loginPage/loginPage";
+import Chats from "./pages/chatsPage/chatsPage";
+import ChatPage from "./pages/chatPage/chatPage";
 import Logout from "./components/logout";
 
 import "./styles/index.css";
-import SignUpPage from "./pages/signUpPage";
-import NavBar from "./components/NavBar";
+import SignUpPage from "./pages/signUpPage/signUpPage";
+import NavBar from "./components/navbar/NavBar";
 
 export default function App() {
   return (

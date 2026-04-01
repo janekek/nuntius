@@ -1,0 +1,168 @@
+/* Globale Variablen & Basis */
+.pageContainer {
+  background-color: var(--bg-dark-main);
+  color: var(--text-main);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  padding: 2rem 1rem;
+}
+
+/* Die SignUp Karte (etwas breiter als Login wegen des Textes) */
+.signUpCard {
+  width: 100%;
+  max-width: 550px;
+  background-color: var(--bg-dark-surface);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Header Bereich */
+.header {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  color: var(--col-primary-accent);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Info Text Box (Erklärung der Philosophie) */
+.infoBox {
+  background-color: rgba(27, 48, 60, 0.3); /* Transparentes col-primary */
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.infoLead {
+  margin: 0 0 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.infoList {
+  margin: 0 0 1.25rem 0;
+  padding-left: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.infoList li {
+  margin-bottom: 0.5rem;
+}
+
+.infoList strong {
+  color: var(--text-main);
+}
+
+/* Spezifische Warnung für das Passwort */
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background-color: rgba(190, 21, 21, 0.1); /* Transparentes col-warning */
+  border-left: 3px solid var(--col-warning);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.warningIcon {
+  color: var(--col-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warningText {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #ffb3b3; /* Aufgehelltes Rot für bessere Lesbarkeit auf Dunkel */
+  line-height: 1.4;
+}
+
+/* Formular Bereich */
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Server Fehleranzeige */
+.serverErrorBox {
+  background-color: rgba(190, 21, 21, 0.1);
+  border-left: 4px solid var(--col-warning);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.serverErrorText {
+  margin: 0;
+  color: var(--col-warning);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Aktionen (SignUp Button) */
+.actionArea {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+/* Footer (Login Link) */
+.footer {
+  text-align: center;
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.loginText {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.loginLink {
+  color: var(--col-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.loginLink:hover {
+  color: #79e334;
+  text-decoration: underline;
+}

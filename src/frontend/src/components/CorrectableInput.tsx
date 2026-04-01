@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import Input from "./Input";
+import Input from "./input/Input";
 import styles from "./CorrectableInput.module.css";
 
 type CorrectableInputProps = {
@@ -8,7 +8,7 @@ type CorrectableInputProps = {
   placeholder: string;
   value: string;
   onChange: (val: string) => void;
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  onEnter?: React.KeyboardEventHandler<HTMLInputElement>;
   schema?: z.ZodTypeAny;
   onErrorChange?: (errorMsg: string) => void;
   forceShowError?: boolean;
@@ -19,7 +19,7 @@ export default function CorrectableInput({
   placeholder,
   value,
   onChange,
-  onKeyDown,
+  onEnter,
   schema,
   onErrorChange,
   forceShowError,
@@ -53,7 +53,7 @@ export default function CorrectableInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={handleBlur}
-        {...(onKeyDown ? { onKeyDown } : {})}
+        {...(onEnter ? { onEnter } : {})}
       />
       {displayedError && <p className={styles.msg}>{displayedError}</p>}
     </div>

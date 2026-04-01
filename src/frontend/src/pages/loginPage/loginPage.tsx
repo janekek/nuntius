@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import CorrectableInput from "../components/CorrectableInput";
-import CustomButton from "../components/CustomButton";
-import VerticalSpace from "../components/VerticalSpace";
-import CenteredVertically from "../components/CenteredVertically";
+import { useNavigate, Link } from "react-router-dom";
+import CorrectableInput from "../../components/CorrectableInput";
+import CustomButton from "../../components/customButton/CustomButton";
 import { useMutation } from "@tanstack/react-query";
-import type ServerResponse from "../shared/ServerResponse";
-import { callAPI } from "../utils/apiClient";
-import { LoginSchema } from "../shared/schemas";
+import type ServerResponse from "../../shared/ServerResponse";
+import { callAPI } from "../../utils/apiClient";
+import { LoginSchema } from "../../shared/schemas";
+
+import styles from "./loginPage.module.css";
+import ErrorBox from "../../components/errorBox/errorBox";
+import Logo from "../../components/logo/logo";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -49,18 +51,15 @@ export default function LoginPage() {
   };
 
   return (
-    <CenteredVertically
-      content={
-        <>
-          <VerticalSpace height={"150px"} />
-          <h1>Welcome to Nuntius</h1>
-          <VerticalSpace height={"20px"} />
-          <p>Enter your data to log in.</p>
-          <VerticalSpace height={"20px"} />
+    <div className={styles.pageContainer}>
+      <div className={styles.loginCard}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>Welcome to Nuntius.</h1>
+          <p className={styles.subtitle}>Enter your data to log in.</p>
+        </header>
 
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+        <div className={styles.formContainer}>
+          <div className={styles.inputGroup}>
             <CorrectableInput
               type="text"
               placeholder="Username"
@@ -76,22 +75,27 @@ export default function LoginPage() {
               onChange={setPassword}
               schema={LoginSchema.shape.password}
               forceShowError={showAllErrors}
+              onEnter={handleLogin}
             />
           </div>
 
-          {serverErrorMsg && (
-            <>
-              <VerticalSpace height={"10px"} />
-              <p style={{ color: "red" }}>{serverErrorMsg}</p>
-            </>
-          )}
+          <ErrorBox>{serverErrorMsg}</ErrorBox>
 
-          <VerticalSpace height={"30px"} />
-          <CustomButton text="Login" onClick={handleLogin}></CustomButton>
-          <VerticalSpace height="30px" />
-          <a href="signup">Sign up here.</a>
-        </>
-      }
-    />
+          <div className={styles.actionArea}>
+            {/* Dein CustomButton bleibt bestehen! Passe ihn ggf. in seinem eigenen CSS an unsere neuen Farben an */}
+            <CustomButton text="Login" onClick={handleLogin} />
+          </div>
+        </div>
+
+        <div className={styles.footer}>
+          <p className={styles.signupText}>
+            Don't have an account yet?{" "}
+            <Link to="/signup" className={styles.signupLink}>
+              Sign up here.
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

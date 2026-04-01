@@ -6,7 +6,7 @@ type CustomInputProps = {
   placeholder: string;
   value: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  onEnter?: React.KeyboardEventHandler<HTMLInputElement>;
   onBlur?: React.ChangeEventHandler<HTMLInputElement>;
 };
 
@@ -15,12 +15,12 @@ export default function Input({
   placeholder,
   value,
   onChange,
-  onKeyDown,
+  onEnter,
   onBlur,
 }: CustomInputProps) {
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  function handleEnter(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
-      onKeyDown?.(e);
+      onEnter?.(e);
     }
   }
 
@@ -31,7 +31,7 @@ export default function Input({
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      onKeyDown={handleKeyDown}
+      onKeyDown={handleEnter}
       onBlur={onBlur}
     />
   );

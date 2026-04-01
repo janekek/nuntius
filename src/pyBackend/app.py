@@ -22,7 +22,7 @@ from datetime import datetime
 from src.utils.status import Status 
 from src.utils.server_response import generate_response
 from src.database.databaseOperations import run_sql_code
-from src.routes import login, logout, signup, chats, chat
+from src.routes import login, logout, signup, chats, chat, searchUser, createChat
 from src.chat.receiveChat import handle_send_message
 
 SESSION_COOKIE_NAME = "session"
@@ -82,6 +82,8 @@ app.include_router(signup.router)
 app.include_router(logout.router)
 app.include_router(chats.router)
 app.include_router(chat.router)
+app.include_router(searchUser.router)
+app.include_router(createChat.router)
 
 @app.post("/api/database")
 async def handle_database(data):

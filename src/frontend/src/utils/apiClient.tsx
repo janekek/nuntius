@@ -24,6 +24,7 @@ export async function callAPI<T>(
   if (requestParameters.body) {
     init.body = requestParameters.body;
   }
+  console.log(requestParameters.body);
 
   const response = await fetch(BASE_URL + endpoint, init);
 

@@ -3,10 +3,14 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
-  width: 350px;
-  border: 1px solid rgb(220, 220, 220);
+  /* width: 350px; */
   transition: border-color 0.15s ease-in-out;
-  font-family: "Code", monospace;
+
+  color: white;
+  background-color: rgb(46, 46, 46);
+  font-family: "Poppins";
+  border: none;
+  outline: none;
 }
 
 .input:hover {
@@ -15,4 +19,9 @@
 
 .input:focus {
   border-color: var(--col-secondary);
+}
+
+.input::placeholder {
+  color: rgb(157, 157, 157);
+  font-family: "Poppins";
 }

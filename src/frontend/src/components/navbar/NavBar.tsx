@@ -1,6 +1,7 @@
-import CenteredVertically from "./CenteredVertically";
+import CenteredVertically from "../CenteredVertically";
 import styles from "./NavBar.module.css";
-import VerticalSpace from "./VerticalSpace";
+import VerticalSpace from "../VerticalSpace";
+import Clickable from "../clickable/clickable";
 
 export default function NavBar() {
   return (
@@ -10,7 +11,9 @@ export default function NavBar() {
         <CenteredVertically
           content={
             <>
-              <span className={styles.logo}>NunTIUS</span>
+              <Clickable link="/">
+                <span className={styles.logo}>NunTIUS</span>
+              </Clickable>
             </>
           }
         />
