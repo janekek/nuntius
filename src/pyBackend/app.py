@@ -1,11 +1,6 @@
 from fastapi import (
-    Cookie,
     FastAPI,
     Request,
-    Query,
-    WebSocket,
-    WebSocketException,
-    status,
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,12 +11,9 @@ import socketio
 
 import uvicorn
 
-from datetime import datetime
-
-
 from src.utils.status import Status 
-from src.utils.server_response import generate_response
-from src.database.databaseOperations import run_sql_code
+from src.utils.server_response import generate_response, generate_ws_payload
+from src.database.databaseOperations import create_chat_with_users, set_user_last_read_message
 from src.routes import login, logout, signup, chats, chat, searchUser, createChat
 from src.chat.receiveChat import handle_send_message
 
@@ -85,9 +77,10 @@ app.include_router(chat.router)
 app.include_router(searchUser.router)
 app.include_router(createChat.router)
 
-@app.post("/api/database")
-async def handle_database(data):
-    response = run_sql_code(data.command)
+@app.get("/api/database")
+async def handle_database(request: Request):
+    response = create_chat_with_users("First chat", ["Janek", "Timon"])
+    # response = run_sql_code(data.command)
     return generate_response(Status.OK, response)
 
 @app.get("/")
@@ -110,6 +103,17 @@ async def join(sid, data):
 @sio.on("sendMessage")
 async def send_message(sid, data):
     await handle_send_message(sid=sid, session=get_session_manually(sid), data=data, sio=sio)
+
+@sio.on("sendReadMessage")
+async def send_read_message(sid, data):
+    session = get_session_manually(sid)
+    if not session or not session.get("loggedIn"):
+        return await sio.emit(generate_ws_payload(Status.USER_NOT_LOGGED_IN, ""), to=sid)
+    username = session.get("username")
+    chat_id = int(data.get("chat_id"))
+    last_message_id = int(data.get("last_message_id"))
+
+    set_user_last_read_message(chat_id=chat_id, last_message_id=last_message_id, username=username)
 # <-- websocket ---
 
 if __name__ == "__main__":

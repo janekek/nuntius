@@ -12,6 +12,15 @@ import { SignupSchema } from "../../shared/schemas";
 import ErrorBox from "../../components/errorBox/errorBox";
 import PasswordMeter from "../../components/passwordMeter/passwordMeter";
 
+// --- Krypto-Imports (stelle sicher, dass du arrayBufferToBase64 etc. in cryptoUtils.ts hast) ---
+import {
+  generateKeyPairFromPassword,
+  deriveKeyFromPassword,
+  arrayBufferToBase64,
+} from "../../utils/cryptoUtils";
+import PageContainer from "../../components/pageContainer/pageContainer";
+import Footer from "../../components/footer/footer";
+
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,14 +32,12 @@ export default function SignUpPage() {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: async (): Promise<ServerResponse<String>> =>
+    mutationFn: async (payload: any): Promise<ServerResponse<String>> =>
       callAPI("/signup", {
         method: "POST",
-        body: JSON.stringify({ username, password, password2 }),
+        body: JSON.stringify(payload),
       }),
-
     onSuccess: (response: ServerResponse<String>) => {
-      console.log(response);
       if (response?.status.code !== 100) {
         setServerErrorMsg(response?.status.msg + "");
         setPassword("");
@@ -41,23 +48,53 @@ export default function SignUpPage() {
     },
     onError: (error) => {
       console.error(error);
+      setServerErrorMsg("Ein unerwarteter Fehler ist aufgetreten.");
     },
   });
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     setServerErrorMsg("");
     const result = SignupSchema.safeParse({ username, password, password2 });
     if (!result.success) {
       setShowAllErrors(true);
       return;
     }
-    mutation.mutate();
+
+    try {
+      // RSA Public/Private Key Pair generieren
+      const { publicKey, privateKey } = await generateKeyPairFromPassword(
+        password2,
+        username,
+      );
+      const publicKeyStr = JSON.stringify(publicKey);
+
+      // 2. Private Key mit dem Secret Password (AES) verschlüsseln
+      const aesKey = await deriveKeyFromPassword(password2, username);
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const encPrivBuffer = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        aesKey,
+        new TextEncoder().encode(JSON.stringify(privateKey)),
+      );
+
+      mutation.mutate({
+        username,
+        password,
+        password2,
+        public_key: publicKeyStr,
+        encrypted_private_key: arrayBufferToBase64(encPrivBuffer),
+        iv_private_key: arrayBufferToBase64(iv.buffer),
+      });
+    } catch (err) {
+      console.error("Fehler bei der Schlüsselgenerierung:", err);
+      setServerErrorMsg("Verschlüsselungs-Setup fehlgeschlagen.");
+    }
   };
 
   return (
-    <div className={styles.pageContainer}>
+    <PageContainer>
       <div className={styles.signUpCard}>
-        <header className={styles.header}>
+        <header className="text-center">
           <h1 className={styles.title}>Join Nuntius</h1>
           <p className={styles.subtitle}>Create your secure account.</p>
         </header>
@@ -79,27 +116,8 @@ export default function SignUpPage() {
           </ul>
 
           <ErrorBox>
-            <div className="flex items-center gap-4">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={styles.warningIcon}
-              >
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-              <p className={styles.warningText}>
-                There is no way to reset your encryption password. If it is
-                lost, your messages are permanently inaccessible.
-              </p>
-            </div>
+            There is no way to reset your encryption password. If it is lost,
+            your messages are permanently inaccessible.
           </ErrorBox>
         </div>
 
@@ -133,26 +151,22 @@ export default function SignUpPage() {
             <PasswordMeter password={password2} />
           </div>
 
-          {serverErrorMsg && (
-            <div className={styles.serverErrorBox}>
-              <p className={styles.serverErrorText}>{serverErrorMsg}</p>
-            </div>
-          )}
+          <ErrorBox>{serverErrorMsg}</ErrorBox>
 
           <div className={styles.actionArea}>
             <CustomButton text="Sign up" onClick={handleSignUp} />
           </div>
         </div>
 
-        <div className={styles.footer}>
+        <Footer>
           <p className={styles.loginText}>
             Already have an account?{" "}
             <Link to="/" className={styles.loginLink}>
               Log in here.
             </Link>
           </p>
-        </div>
+        </Footer>
       </div>
-    </div>
+    </PageContainer>
   );
 }

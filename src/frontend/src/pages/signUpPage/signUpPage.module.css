@@ -29,10 +29,6 @@
 }
 
 /* Header Bereich */
-.header {
-  text-align: center;
-}
-
 .title {
   margin: 0;
   font-size: 1.8rem;
@@ -82,30 +78,6 @@
   color: var(--text-main);
 }
 
-/* Spezifische Warnung für das Passwort */
-.warningBox {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  background-color: rgba(190, 21, 21, 0.1); /* Transparentes col-warning */
-  border-left: 3px solid var(--col-warning);
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-}
-
-.warningIcon {
-  color: var(--col-warning);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.warningText {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #ffb3b3; /* Aufgehelltes Rot für bessere Lesbarkeit auf Dunkel */
-  line-height: 1.4;
-}
-
 /* Formular Bereich */
 .formContainer {
   display: flex;
@@ -119,21 +91,6 @@
   gap: 1rem;
 }
 
-/* Server Fehleranzeige */
-.serverErrorBox {
-  background-color: rgba(190, 21, 21, 0.1);
-  border-left: 4px solid var(--col-warning);
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-}
-
-.serverErrorText {
-  margin: 0;
-  color: var(--col-warning);
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
 /* Aktionen (SignUp Button) */
 .actionArea {
   display: flex;
@@ -141,28 +98,8 @@
   margin-top: 0.5rem;
 }
 
-/* Footer (Login Link) */
-.footer {
-  text-align: center;
-  margin-top: 0.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border-subtle);
-}
-
 .loginText {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
-}
-
-.loginLink {
-  color: var(--col-secondary);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.loginLink:hover {
-  color: #79e334;
-  text-decoration: underline;
 }

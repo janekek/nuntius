@@ -11,7 +11,7 @@
     system-ui,
     -apple-system,
     sans-serif;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 1rem;
 }
 
 /* Chat App Container */
@@ -193,20 +193,15 @@
   gap: 0.5rem;
   height: 44px; /* Fixe Höhe, damit er bündig mit dem Input ist */
   padding: 0 1.25rem;
-  background-color: var(--col-secondary);
-  color: #000;
-  border: none;
+  /* background-color: var(--col-secondary); */
+  /* color: #000; */
+  /* border: none; */
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: none;
-}
-
-.sendButton:hover {
-  background-color: #79e334; /* Helleres Grün für Hover */
-  transform: translateY(-1px);
 }
 
 .sendButton:active {
@@ -219,4 +214,37 @@
   text-align: center;
   padding: 2rem;
   font-weight: bold;
+}
+
+/* Header Bereich */
+.header {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  color: var(--col-primary-accent);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.signupText {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+input {
+  width: 100%;
 }

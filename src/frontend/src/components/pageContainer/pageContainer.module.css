@@ -1,0 +1,14 @@
+.container {
+  background-color: var(--bg-dark-main);
+  color: var(--text-main);
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Zentriert die Karte vertikal */
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  padding: 1rem 1rem 1rem 1rem;
+}

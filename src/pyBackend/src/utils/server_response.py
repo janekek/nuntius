@@ -15,6 +15,15 @@ def generate_response(status: Status, content: any = "") -> JSONResponse:
         }
     )
 
+def generate_ws_payload(status: Status, content: any = "") -> dict:
+    return {
+        "status": {
+            "code": status.value.code, # Dein interner Code (z.B. 401)
+            "msg": status.value.msg
+        },
+        "content": content
+    }
+
 def send_response(status: Status, content: any = "") -> JSONResponse:
     # TS Code hatte generateResponse und sendResponse separat, machten vermutlich dasselbe
     return generate_response(status, content)

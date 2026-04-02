@@ -3,9 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  a:hover {
-    @apply underline;
-  }
   button {
     padding: 4px 15px;
     color: var(--col-primary-accent);
@@ -34,5 +31,15 @@
   }
   h1 {
     font-size: 30px;
+  }
+  a {
+    color: var(--col-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+  a:hover {
+    color: #79e334; /* Helleres Grün */
+    text-decoration: underline;
   }
 }

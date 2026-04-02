@@ -1,43 +1,42 @@
 from src.utils.status import Status, StatusDetail
 from src.database.databaseOperations import add_message_to_chat
+from src.database.databaseOperations import add_encrypted_message
 
 from datetime import datetime
 
 async def handle_send_message(sid, session, data, sio):
-
     if not session or not session.get("loggedIn"):
-        print("hi")
         await sio.emit("error", {"message": "Nicht authentifiziert"}, to=sid)
         return
 
-    chat_id_raw = data.get("chatID")
-    msg = data.get("msg")
-    
-    try:
-        chat_id = int(chat_id_raw)
-    except (ValueError, TypeError):
-        await sio.emit("error", {"message": "Ungültige Chat-ID"}, to=sid)
-        return
+    chat_id = int(data.get("chatID"))
+    encrypted_content = data.get("encryptedContent")
+    iv = data.get("iv")
+    keys = data.get("keys") # list: [{"username": "Janek", "encryptedKey": "..."}, ...]
 
-    # Logik-Check in DB
-    result = add_chat_message_to_database(session, msg, chat_id)
+    sender = session.get("username")
 
-    if result.code == Status.OK.code:
+    result = add_encrypted_message(chat_id, sender, encrypted_content, iv, keys)
+
+    if result["code"] == Status.OK.code:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # Jeder Client filtert sich dann seinen Key aus dem Array heraus.
         message_payload = {
-            "content": msg,
-            "sender_username": session.get("username"),
+            "id": result["message_id"],
+            "content": encrypted_content, # Wichtig: Heißt jetzt oft noch content im Frontend, enthält aber den Ciphertext
+            "iv": iv,
+            "keys": keys,
+            "sender_username": sender,
             "timestamp": timestamp
         }
 
-        # FIX: await hinzufügen und Raum als String
         await sio.emit("receiveMessage", {
-            "status": result.msg,
+            "status": result["msg"],
             "message": message_payload
         }, room=str(chat_id))
     else:
-        await sio.emit("error", {"message": result.msg}, to=sid)
+        await sio.emit("error", {"message": "Fehler beim Speichern"}, to=sid)
 
 
 def add_chat_message_to_database(session: dict, msg: str, chat_id: int) -> StatusDetail:

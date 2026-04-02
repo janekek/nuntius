@@ -12,7 +12,9 @@ cursor.executescript("""
     CREATE TABLE IF NOT EXISTS users (
         username TEXT PRIMARY KEY,
         password_hash TEXT NOT NULL,
-        public_key TEXT NOT NULL
+        public_key TEXT NOT NULL,
+        encrypted_private_key TEXT NOT NULL, -- NEU
+        iv_private_key TEXT NOT NULL         -- NEU
     );
 
     CREATE TABLE IF NOT EXISTS chats (
@@ -23,6 +25,8 @@ cursor.executescript("""
     CREATE TABLE IF NOT EXISTS chat_participants (
         chat_id INTEGER,
         username TEXT,
+        send_read_receipts BOOLEAN DEFAULT 1,
+        last_read_message_id INTEGER DEFAULT 0,
         PRIMARY KEY (chat_id, username),
         FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
         FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
@@ -32,10 +36,20 @@ cursor.executescript("""
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         chat_id INTEGER,
         sender_username TEXT,
-        content TEXT NOT NULL,
+        encrypted_content TEXT NOT NULL,
+        iv TEXT NOT NULL,        
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
         FOREIGN KEY (sender_username) REFERENCES users(username)
+    );
+                     
+    CREATE TABLE IF NOT EXISTS message_keys (
+        message_id INTEGER,
+        username TEXT,
+        encrypted_sym_key TEXT NOT NULL, -- Der AES-Key, verschlüsselt mit dem Public Key des jeweiligen Users
+        PRIMARY KEY (message_id, username),
+        FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+        FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
     );
 """)
 db.commit()

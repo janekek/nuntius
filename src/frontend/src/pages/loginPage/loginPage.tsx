@@ -10,6 +10,9 @@ import { LoginSchema } from "../../shared/schemas";
 import styles from "./loginPage.module.css";
 import ErrorBox from "../../components/errorBox/errorBox";
 import Logo from "../../components/logo/logo";
+import PageContainer from "../../components/pageContainer/pageContainer";
+import SinglePageContainer from "../../components/singlePageContainer/singlePageContainer";
+import Footer from "../../components/footer/footer";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -51,15 +54,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.loginCard}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>Welcome to Nuntius.</h1>
-          <p className={styles.subtitle}>Enter your data to log in.</p>
+    <PageContainer>
+      <SinglePageContainer style={{ width: "100%", maxWidth: "400px" }}>
+        <header className="text-center">
+          <h1 className="m-0 text-[1.8rem] font-bold text-[var(--text-main)] tracking-[-0.02em]">
+            Welcome to Nuntius.
+          </h1>
+          <p className="m-0 mt-2 text-[var(--text-muted)] text-[0.95rem]">
+            Enter your data to log in.
+          </p>
         </header>
 
-        <div className={styles.formContainer}>
-          <div className={styles.inputGroup}>
+        <div className={"flex flex-col gap-6"}>
+          <div className={"flex flex-col gap-4"}>
             <CorrectableInput
               type="text"
               placeholder="Username"
@@ -81,21 +88,20 @@ export default function LoginPage() {
 
           <ErrorBox>{serverErrorMsg}</ErrorBox>
 
-          <div className={styles.actionArea}>
-            {/* Dein CustomButton bleibt bestehen! Passe ihn ggf. in seinem eigenen CSS an unsere neuen Farben an */}
+          <div className="flex flex-col mt-2">
             <CustomButton text="Login" onClick={handleLogin} />
           </div>
         </div>
 
-        <div className={styles.footer}>
-          <p className={styles.signupText}>
+        <Footer>
+          <p className="m-0 text-[var(--text-muted)] text-[0.9rem]">
             Don't have an account yet?{" "}
             <Link to="/signup" className={styles.signupLink}>
               Sign up here.
             </Link>
           </p>
-        </div>
-      </div>
-    </div>
+        </Footer>
+      </SinglePageContainer>
+    </PageContainer>
   );
 }

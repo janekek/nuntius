@@ -24,8 +24,9 @@
   max-width: 600px;
   background-color: var(--bg-dark-surface);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Header */
@@ -62,7 +63,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -81,6 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  position: relative;
 }
 
 .chatCard {
@@ -133,6 +135,8 @@
 .chatAction {
   color: var(--text-muted);
   transition: color 0.2s ease;
+  display: flex;
+  gap: 5px;
 }
 
 /* Avatare */
@@ -223,4 +227,36 @@
 .actionButton:hover {
   background-color: var(--col-secondary);
   color: #000;
+}
+
+.chatActionArea {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.unreadBadge {
+  background-color: var(--col-warning); /* Das Rot passt hier perfekt */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.buttonBadge {
+  background-color: var(--col-warning); /* Das Rot passt hier perfekt */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+
+  position: absolute; /* Position the badge within the relatively positioned button */
+  top: 0;
+  right: 0;
 }

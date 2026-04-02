@@ -27,4 +27,6 @@ export interface FullChat {
   chat_name: string | null;
   participants: string[];
   messages: Message[];
+  last_read_message_id: number;
+  unread_count: number;
 }

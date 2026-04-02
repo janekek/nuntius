@@ -81,7 +81,7 @@ export default function Chats() {
                 <p className={styles.subtitle}>These are your chats.</p>
               </header>
 
-              <VerticalSpace height="30px" />
+              <VerticalSpace height="40px" />
 
               <div className={styles.section}>
                 <h2 className={styles.sectionTitle}>Your chats</h2>
@@ -97,6 +97,12 @@ export default function Chats() {
                         key={chat.chat_id}
                         className={styles.chatCard}
                       >
+                        {chat.unread_count > 0 && (
+                          <span className={styles.buttonBadge}>
+                            {chat.unread_count}
+                          </span>
+                        )}
+
                         <div className={styles.chatInfo}>
                           <div className={styles.avatarGroup}>
                             {chat.participants.slice(0, 2).map((p, i) => (
@@ -117,8 +123,10 @@ export default function Chats() {
                             <span className={styles.chatIdLabel}>
                               ID: {chat.chat_id}
                             </span>
+                            <span className={styles.chatIdLabel}> </span>
                           </div>
                         </div>
+
                         <div className={styles.chatAction}>
                           <svg
                             width="24"
@@ -154,7 +162,6 @@ export default function Chats() {
                         setSendSearchUsernameText(false);
                       }
                     }}
-                    // className={styles.searchInput} // Falls deine Input-Komponente das unterstützt
                   />
                 </div>
 
