@@ -1,55 +1,55 @@
-import sqlite3
-import os
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, func
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
-os.makedirs("database", exist_ok=True)
+Base = declarative_base()
 
-# check_same_thread=False erlaubt FastAPI (welches Threadpools nutzt), die gleiche DB-Verbindung zu verwenden (analog zu better-sqlite3)
-db = sqlite3.connect("database/chat.db", check_same_thread=False)
-db.row_factory = sqlite3.Row # Damit Ergebnisse wie Dictionaries ansprechbar sind
+# Verbindung zur SQLite DB (wie in deinem Beispiel)
+engine = create_engine("sqlite:///database/chat.db", connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-cursor = db.cursor()
-cursor.executescript("""
-    CREATE TABLE IF NOT EXISTS users (
-        username TEXT PRIMARY KEY,
-        password_hash TEXT NOT NULL,
-        public_key TEXT NOT NULL,
-        encrypted_private_key TEXT NOT NULL, -- NEU
-        iv_private_key TEXT NOT NULL         -- NEU
-    );
+class User(Base):
+    __tablename__ = "users"
+    
+    username = Column(String, primary_key=True)
+    password_hash = Column(String, nullable=False)
+    public_key = Column(String, nullable=False)
+    encrypted_private_key = Column(String, nullable=False)
+    iv_private_key = Column(String, nullable=False)
 
-    CREATE TABLE IF NOT EXISTS chats (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chat_name TEXT
-    );
+class Chat(Base):
+    __tablename__ = "chats"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_name = Column(String)
 
-    CREATE TABLE IF NOT EXISTS chat_participants (
-        chat_id INTEGER,
-        username TEXT,
-        send_read_receipts BOOLEAN DEFAULT 1,
-        last_read_message_id INTEGER DEFAULT 0,
-        PRIMARY KEY (chat_id, username),
-        FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-        FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
-    );
+class ChatParticipant(Base):
+    __tablename__ = "chat_participants"
+    
+    # Composite Primary Key (wie in deinem SQL)
+    chat_id = Column(Integer, ForeignKey("chats.id", ondelete="CASCADE"), primary_key=True)
+    username = Column(String, ForeignKey("users.username", ondelete="CASCADE"), primary_key=True)
+    
+    send_read_receipts = Column(Boolean, default=True)
+    last_read_message_id = Column(Integer, default=0)
 
-    CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chat_id INTEGER,
-        sender_username TEXT,
-        encrypted_content TEXT NOT NULL,
-        iv TEXT NOT NULL,        
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
-        FOREIGN KEY (sender_username) REFERENCES users(username)
-    );
-                     
-    CREATE TABLE IF NOT EXISTS message_keys (
-        message_id INTEGER,
-        username TEXT,
-        encrypted_sym_key TEXT NOT NULL, -- Der AES-Key, verschlüsselt mit dem Public Key des jeweiligen Users
-        PRIMARY KEY (message_id, username),
-        FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
-        FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
-    );
-""")
-db.commit()
+class Message(Base):
+    __tablename__ = "messages"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(Integer, ForeignKey("chats.id", ondelete="CASCADE"))
+    sender_username = Column(String, ForeignKey("users.username"))
+    encrypted_content = Column(String, nullable=False)
+    iv = Column(String, nullable=False)
+    timestamp = Column(DateTime, server_default=func.now()) # Entspricht CURRENT_TIMESTAMP
+
+class MessageKey(Base):
+    __tablename__ = "message_keys"
+    
+    message_id = Column(Integer, ForeignKey("messages.id", ondelete="CASCADE"), primary_key=True)
+    username = Column(String, ForeignKey("users.username", ondelete="CASCADE"), primary_key=True)
+    encrypted_sym_key = Column(String, nullable=False)
+
+    # Erstellt alle Tabellen, falls sie noch nicht existieren
+Base.metadata.create_all(bind=engine)
+
+db = SessionLocal()

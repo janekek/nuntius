@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,6 +27,9 @@ import PageContainer from "../../components/pageContainer/pageContainer";
 import SinglePageContainer from "../../components/singlePageContainer/singlePageContainer";
 import ErrorBox from "../../components/errorBox/errorBox";
 import Footer from "../../components/footer/footer";
+import NewMessagesHR from "../../components/newMessagesHR/newMessagesHR";
+
+import doubleTick from "../../img/double-tick-2.png";
 
 const socket = io("http://localhost:5000", {
   withCredentials: true,
@@ -281,18 +284,19 @@ function ChatPage() {
           <div className={styles.headerInfo}>
             <div className={styles.avatarGroup}>
               {chat?.participants
-                .filter((p) => p !== currentUsername)
+                .filter((p) => p.username !== currentUsername)
                 .slice(0, 2)
                 .map((p, i) => (
                   <div key={i} className={styles.avatar}>
-                    {p.charAt(0).toUpperCase()}
+                    {p.username.charAt(0).toUpperCase()}
                   </div>
                 ))}
             </div>
             <div>
               <h1 className={styles.chatTitle}>
                 {chat?.participants
-                  .filter((p) => p !== currentUsername)
+                  .filter((p) => p.username !== currentUsername)
+                  .map((p) => p.username)
                   .join(", ") || "Chat"}
               </h1>
               <span className={styles.chatIdLabel}>ID: {chat?.chat_id}</span>
@@ -320,23 +324,59 @@ function ChatPage() {
           <div className={styles.messageSpacer}></div>
           {chat?.messages.map((m, i) => {
             const isOwn = m.sender_username === currentUsername;
-            const is2 = i === 2;
+            const last_read_message_id = chat.last_read_message_id;
+            let displayHR = false;
+            if (m.id > last_read_message_id) {
+              const hasSmallerUnreadMessage = chat.messages.some(
+                (otherMsg) =>
+                  otherMsg.id > last_read_message_id && otherMsg.id < m.id,
+              );
+              if (!hasSmallerUnreadMessage) displayHR = true;
+            }
+            let show_is_read = false;
+            if (isOwn) {
+              const otherParticipants = chat.participants.filter(
+                (p) => p.username !== currentUsername,
+              );
+              if (otherParticipants.length > 0) {
+                const isReadByAll = otherParticipants.every(
+                  (p) => m.id <= p.last_read_message_id,
+                );
+                if (isReadByAll) {
+                  show_is_read = true; // Nachricht wurde von allen anderen gelesen
+                }
+              }
+            }
             return (
-              <div
-                key={i}
-                className={`${styles.messageWrapper} ${isOwn ? styles.messageOwn : styles.messageOther}`}
-              >
-                {is2 && <span>--------</span>}
-                {!isOwn && (
-                  <span className={styles.senderName}>{m.sender_username}</span>
-                )}
-                <div className={styles.messageBubble}>
-                  <p className={styles.messageContent}>{m.content}</p>
-                  <span className={styles.timestamp}>
-                    {formatSmartDate(m.timestamp)}
-                  </span>
+              <React.Fragment key={i}>
+                {displayHR && <NewMessagesHR></NewMessagesHR>}
+                <div
+                  className={`${styles.messageWrapper} ${isOwn ? styles.messageOwn : styles.messageOther}`}
+                >
+                  {!isOwn && (
+                    <span className={styles.senderName}>
+                      {m.sender_username}
+                    </span>
+                  )}
+                  <div className={styles.messageBubble}>
+                    <p className={styles.messageContent}>{m.content}</p>
+                    <div className={styles.messageFooter}>
+                      <span className={styles.timestamp}>
+                        {formatSmartDate(m.timestamp)}
+                      </span>
+                      {show_is_read && (
+                        <>
+                          <img
+                            src={doubleTick}
+                            alt="Read"
+                            className={styles.logoImage}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </React.Fragment>
             );
           })}
           <div ref={messagesEndRef} />

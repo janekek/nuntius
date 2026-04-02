@@ -25,7 +25,11 @@ class Message(BaseModel):
 class FullChat(BaseModel):
     chat_id: int
     chat_name: Optional[str] = None
-    participants: List[str]
+    participants: List[ChatParticipant]
     messages: List[Message]
     last_read_message_id: int
     unread_count: int
+
+class ChatParticipant (BaseModel):
+    username: str
+    last_read_message_id: int

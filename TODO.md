@@ -14,5 +14,5 @@
 
 - frontend: check if secret passwiord and normal password doesnt match
 - front/back: hast the normal password in frontend, not backend
-- methods: PBKDF2, AES-GCM,Session Key (AES), RSA-2048, AES-256-GCM
+- methods: PBKDF2, AES-GCM,Session Key (AES), RSA-2048, AES-256-GCM, SQLAlchemie
 - change password ?

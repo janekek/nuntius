@@ -107,7 +107,7 @@ export default function Chats() {
                           <div className={styles.avatarGroup}>
                             {chat.participants.slice(0, 2).map((p, i) => (
                               <div key={i} className={styles.avatar}>
-                                {p.charAt(0).toUpperCase()}
+                                {p.username.charAt(0).toUpperCase()}
                               </div>
                             ))}
                             {chat.participants.length > 2 && (
@@ -118,7 +118,9 @@ export default function Chats() {
                           </div>
                           <div className={styles.chatDetails}>
                             <span className={styles.participantsName}>
-                              {chat.participants.join(", ")}
+                              {chat.participants
+                                .map((p) => p.username)
+                                .join(", ")}
                             </span>
                             <span className={styles.chatIdLabel}>
                               ID: {chat.chat_id}

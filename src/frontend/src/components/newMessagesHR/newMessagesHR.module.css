@@ -1,3 +1,24 @@
-.hr {
-  color: var(--col-warning);
+.dividerContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 1.5rem 0 0.5rem 0; /* Gibt dem Teiler genug Luft zum Atmen zwischen den Chat-Bubbles */
+  opacity: 0.85; /* Leicht transparent, damit es sich noch besser ins Dark Theme einfügt */
+}
+
+.line {
+  flex-grow: 1; /* Sorgt dafür, dass die Linie den gesamten restlichen Platz einnimmt */
+  height: 1px;
+  background-color: var(--col-secondary);
+  opacity: 0.3; /* Die Linie selbst ist noch etwas dezenter als der Text */
+}
+
+.text {
+  margin: 0 1rem;
+  color: var(--col-secondary);
+  font-size: 0.75rem; /* Schön klein und dezent */
+  font-weight: 700;
+  text-transform: uppercase; /* Zwingt alles in Großbuchstaben, egal wie es im Code steht */
+  letter-spacing: 0.15em; /* Der gesperrte Look (Zeichenabstand) macht es extrem modern */
+  user-select: none; /* Verhindert, dass der Nutzer den Text versehentlich markiert */
 }

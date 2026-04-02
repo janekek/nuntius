@@ -248,3 +248,36 @@
 input {
   width: 100%;
 }
+
+.messageFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.receipt {
+  font-size: 0.7rem;
+  color: var(--text-muted); /* Standard für gesendet (✓) */
+}
+
+/* Wir nutzen eine CSS-Klasse, falls du "✓✓" renderst */
+.receiptRead {
+  color: #4dabf7; /* Ein klassisches Messenger-Blau für "Gelesen" */
+}
+
+.typingIndicator {
+  font-size: 0.8rem;
+  color: var(--col-secondary);
+  font-style: italic;
+  position: absolute; /* Über dem Input-Feld platzieren */
+  bottom: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.logoImage {
+  width: 25px; /* Oder wie groß du es haben möchtest */
+  height: 25px;
+  display: block; /* Stellt sicher, dass das Zentrieren funktioniert */
+}
