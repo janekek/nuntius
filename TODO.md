@@ -1,6 +1,6 @@
 - use another encryting algorithm (sha is too fast), bcrypt
 - types/session.d.ts global machen?
-- [FIND_ICH_OVERKILL]tailwind
+- [DONE] tailwind
 - [INFO] callAPIHook >> geändert
 - enum TRANS
 - [DONE] AI implement
@@ -12,7 +12,9 @@
 
 - jwt token, backend
 
-- frontend: check if secret passwiord and normal password doesnt match
-- front/back: hast the normal password in frontend, not backend
+- [DONE] frontend: check if secret passwiord and normal password doesnt match
+- [DONE] front/back: hast the normal password in frontend, not backend
 - methods: PBKDF2, AES-GCM,Session Key (AES), RSA-2048, AES-256-GCM, SQLAlchemie
 - change password ?
+
+- session cookie nicht mit username als identifikation!

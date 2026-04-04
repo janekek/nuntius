@@ -1,10 +1,20 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, func, text
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
+from sqlalchemy import event 
+from sqlalchemy.engine import Engine
+
 Base = declarative_base()
 
-# Verbindung zur SQLite DB (wie in deinem Beispiel)
+# Verbindung zur SQLite DB
 engine = create_engine("sqlite:///database/chat.db", connect_args={"check_same_thread": False})
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class User(Base):

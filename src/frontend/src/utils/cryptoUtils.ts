@@ -180,3 +180,62 @@ export async function deriveKeyFromPassword(password: string, salt: string) {
     ["encrypt", "decrypt"],
   );
 }
+
+export async function reWrapSessionKeysForNewUser(
+  messages: any[],
+  myUsername: string,
+  myPrivateKeyJwk: any,
+  newUserPublicKeyString: string,
+) {
+  // 1. Keys importieren
+  const newUserKeyJwk = JSON.parse(newUserPublicKeyString);
+  const newUserRsaPubKey = await window.crypto.subtle.importKey(
+    "jwk",
+    newUserKeyJwk,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    false,
+    ["encrypt"],
+  );
+  const myPrivateKey = await window.crypto.subtle.importKey(
+    "jwk",
+    myPrivateKeyJwk,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    false,
+    ["decrypt"],
+  );
+
+  const newKeysPayload = [];
+
+  // 2. Über alte Nachrichten iterieren
+  for (const msg of messages) {
+    // Finde meinen eigenen, verschlüsselten AES-Key für diese Nachricht
+    const myKeyObj = msg.keys?.find((k: any) => k.username === myUsername);
+    if (!myKeyObj) continue; // Überspringen, falls ich die Nachricht selbst nicht lesen kann
+
+    try {
+      // A) Entschlüsseln mit meinem Private Key
+      const encryptedSymKeyBuffer = base64ToArrayBuffer(myKeyObj.encryptedKey);
+      const rawAesKey = await window.crypto.subtle.decrypt(
+        { name: "RSA-OAEP" },
+        myPrivateKey,
+        encryptedSymKeyBuffer,
+      );
+
+      // B) Wieder verschlüsseln mit dem Public Key des NEUEN Users
+      const newlyEncryptedSymKeyBuffer = await window.crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        newUserRsaPubKey,
+        rawAesKey,
+      );
+
+      // C) Speichern für das Backend-Payload
+      newKeysPayload.push({
+        message_id: msg.id,
+        encrypted_sym_key: arrayBufferToBase64(newlyEncryptedSymKeyBuffer),
+      });
+    } catch (e) {
+      console.error("Fehler beim Umverpacken von Nachricht", msg.id, e);
+    }
+  }
+  return newKeysPayload;
+}

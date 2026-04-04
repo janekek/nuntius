@@ -13,6 +13,7 @@ import Footer from "../../components/footer/footer";
 import LoadingPage from "../LoadingPage";
 import SiteContainer from "../../components/siteContainer/siteContainer";
 import MainMiddleComponent from "../../components/mainMiddleComponent/mainMiddleComponent";
+import type { SilentResponse } from "../../shared/ServerResponse";
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +21,8 @@ export default function SettingsPage() {
   const [activeColorId, setActiveColorId] = useState(0);
   const [toastMsg, setToastMsg] = useState("");
   const allColors = UserColor.getAllColors();
+
+  const navigator = useNavigate();
 
   useEffect(() => {
     try {
@@ -84,6 +87,18 @@ export default function SettingsPage() {
   const handleColorSelect = (id: number) => {
     setActiveColorId(id);
     changeColorMutation.mutate(id);
+  };
+
+  const handleDeleteAccount = () => {
+    const call = callAPI<ServerResponse<SilentResponse>>("/user/delete", {
+      method: "POST",
+    });
+    call.then((res) => {
+      if (res.status.code === Status.OK.code) {
+        //sendToast TODO
+        navigator("/");
+      }
+    });
   };
 
   if (isLoading) {
@@ -152,7 +167,9 @@ export default function SettingsPage() {
                 Permanently delete your account. All messages will be lost.
               </p>
             </div>
-            <button className={styles.dangerBtn}>Delete Account</button>
+            <button className={styles.dangerBtn} onClick={handleDeleteAccount}>
+              Delete Account
+            </button>
           </div>
         </div>
       </MainMiddleComponent>

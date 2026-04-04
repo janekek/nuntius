@@ -317,6 +317,8 @@ function ChatPage() {
             navigator={navigate}
             setToastMsg={setToastMsg}
             currentUsername={currentUsername}
+            chat={chat!}
+            privateKeyJwk={privateKeyJwk}
           />
         ) : (
           <>

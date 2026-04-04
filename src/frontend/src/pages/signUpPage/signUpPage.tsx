@@ -18,6 +18,7 @@ import type { SilentResponse } from "../../shared/ServerResponse";
 import { Status } from "../../shared/Status";
 import SiteContainer from "../../components/siteContainer/siteContainer";
 import MainMiddleComponent from "../../components/mainMiddleComponent/mainMiddleComponent";
+import { UserColor } from "../../shared/colors";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
@@ -94,7 +95,7 @@ export default function SignUpPage() {
         public_key: publicKeyStr,
         encrypted_private_key: arrayBufferToBase64(encPrivBuffer),
         iv_private_key: arrayBufferToBase64(iv.buffer),
-        color_id: "0",
+        color_id: UserColor.getRandomColorId(),
       });
     } catch (err) {
       console.error("Error during key generation:", err);

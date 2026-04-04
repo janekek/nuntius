@@ -1,5 +1,4 @@
-from sqlalchemy import text
-# Nimm an, dass 'db' jetzt deine SQLAlchemy Session ist
+from sqlalchemy import text, func
 from src.database.database import db 
 from src.utils.status import Status
 from src.utils.myTypes import EnhancedUser, FullChat, Message, ChatParticipant, SearchMatch
@@ -111,7 +110,7 @@ def get_chat_participants(chat_id: int) -> List[ChatParticipant]:
         chat_participant = ChatParticipant(
             username=p.username,
             last_read_message_id=last_read,
-            color_id=color_id
+            color_id=color_id or 0
         )
         participants_data.append(chat_participant)
     
@@ -186,6 +185,12 @@ def run_sql_code(code: str) -> List[dict]:
     except Exception:
         db.rollback() # Bei Fehlern lieber einen Rollback machen!
         return []
+
+def get_user_public_key(username: str):
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        return user.public_key
+    return None
 
 # --- neu chat model end2end ---
 def get_chat_public_keys(chat_id: int) -> list[dict]:
@@ -317,3 +322,88 @@ def set_user_color(username: str, color_id: int):
             print(f"Fehler beim Speichern: {e}")
             return False
     return False
+
+
+def _ensure_system_user_exists():
+    """Hilfsfunktion: Prüft, ob '[TheAnonymous]' existiert und legt ihn an, falls nicht."""
+    sys_user = db.query(User).filter(User.username == "[TheAnonymous]").first()
+    if not sys_user:
+        sys_user = User(
+            username="[TheAnonymous]",
+            password_hash="system",
+            public_key="system",
+            encrypted_private_key="system",
+            iv_private_key="system",
+            color_id=0,
+            send_read_receipts_default=False
+        )
+        db.add(sys_user)
+        db.flush() # flush() schreibt es in die DB, ohne die Transaktion schon zu committen
+
+def leave_chat(username: str, chat_id: int):
+    try:
+        # 1. System-User sicherstellen
+        _ensure_system_user_exists()
+
+        # 2. Eigentum der Nachrichten DIESES Chats auf den System-User übertragen
+        db.query(MessageModel).filter(
+            MessageModel.chat_id == chat_id,
+            MessageModel.sender_username == username
+        ).update({"sender_username": "[TheAnonymous]"}, synchronize_session=False)
+
+        # 3. User aus dem Chat entfernen
+        db.query(ChatParticipantModel).filter(
+            ChatParticipantModel.chat_id == chat_id,
+            ChatParticipantModel.username == username
+        ).delete(synchronize_session=False)
+
+        # 4. Die verschlüsselten Message-Keys dieses Users für diesen Chat löschen.
+        # SQLAlchemy Subquery: Finde alle message_ids dieses Chats
+        subq = db.query(MessageModel.id).filter(MessageModel.chat_id == chat_id).subquery()
+        db.query(MessageKey).filter(
+            MessageKey.username == username,
+            MessageKey.message_id.in_(subq)
+        ).delete(synchronize_session=False)
+
+        # 5. Prüfen, ob der Chat jetzt komplett leer ist
+        participant_count = db.query(func.count(ChatParticipantModel.chat_id)).filter(
+            ChatParticipantModel.chat_id == chat_id
+        ).scalar()
+
+        if participant_count == 0:
+            # Wenn leer, Chat löschen (ondelete="CASCADE" => löscht auch automatisch alle verbliebenen Messages dieses Chats)
+            db.query(Chat).filter(Chat.id == chat_id).delete(synchronize_session=False)
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("Fehler beim Verlassen des Chats:", e)
+        raise e
+
+def delete_user_account(username: str):
+    try:
+        # 1. System-User sicherstellen
+        _ensure_system_user_exists()
+
+        # 2. Eigentum ALLER Nachrichten dieses Users serverweit übertragen
+        db.query(MessageModel).filter(
+            MessageModel.sender_username == username
+        ).update({"sender_username": "[TheAnonymous]"}, synchronize_session=False)
+
+        # 3. User löschen (löscht dank CASCADE auch alle ChatParticipant und MessageKey Einträge!)
+        db.query(User).filter(User.username == username).delete(synchronize_session=False)
+
+        # 4. Aufräumen: Geister-Chats löschen (Chats ohne Teilnehmer)
+        # SQLAlchemy Subquery: Alle Chat-IDs, die noch Teilnehmer haben
+        active_chat_ids_subq = db.query(ChatParticipantModel.chat_id).subquery()
+        
+        # Lösche alle Chats, deren ID NICHT in der Subquery ist
+        db.query(Chat).filter(
+            Chat.id.not_in(active_chat_ids_subq)
+        ).delete(synchronize_session=False)
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("Fehler beim Löschen des Accounts:", e)
+        raise e

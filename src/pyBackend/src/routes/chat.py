@@ -2,7 +2,11 @@ from fastapi import APIRouter, Request, Path
 from src.utils.status import Status
 from src.utils.server_response import generate_response
 from src.database.databaseOperations import get_full_chat, get_chat_public_keys
-from src.database.databaseOperations import get_user_encrypted_private_key
+from src.database.databaseOperations import get_user_encrypted_private_key, get_user_public_key, leave_chat, delete_user_account
+from src.database.database import db, User, ChatParticipant, MessageKey
+from pydantic import BaseModel
+from typing import List
+from src.database.databaseOperations import db
 
 router = APIRouter()
 
@@ -53,3 +57,109 @@ async def handle_get_my_keys(request: Request):
         return generate_response(Status.ERROR, "Keine Keys gefunden")
 
     return generate_response(Status.OK, keys)
+
+class GetUserPublicKeyRequest(BaseModel):
+    username: str
+
+@router.post("/api/chat/get_user_public_key")
+async def user_public_key(request: Request, data: GetUserPublicKeyRequest):
+    if not request.session or not request.session.get("loggedIn"):
+        return generate_response(Status.USER_NOT_LOGGED_IN, "")
+    # username = request.session.get("username")
+    public_key = get_user_public_key(username=data.username)
+    return generate_response(Status.OK, {"public_key" : public_key})
+
+class AddUserRequest(BaseModel):
+    new_username: str
+    historic_keys: List[dict]
+
+@router.post("/api/chat/{chat_id}/add_user")
+async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserRequest):
+    if not request.session.get("loggedIn"):
+        return generate_response(Status.USER_NOT_LOGGED_IN, "")
+
+    current_user = request.session.get("username")
+
+    try:
+        # 1. Prüfen ob der Ausführende überhaupt im Chat ist
+        # SQLAlchemy Query: Finde den ersten Eintrag, der auf die Bedingungen passt
+        is_in_chat = db.query(ChatParticipant).filter(
+            ChatParticipant.chat_id == chat_id,
+            ChatParticipant.username == current_user
+        ).first()
+        
+        if not is_in_chat:
+            return generate_response(Status.ERROR, "Du bist nicht in diesem Chat!")
+
+        # 2. Prüfen ob der neue User existiert
+        user_to_add = db.query(User).filter(User.username == data.new_username).first()
+        if not user_to_add:
+            return generate_response(Status.ERROR, "Benutzer existiert nicht.")
+
+        # 3. User dem Chat hinzufügen (ignorieren, falls er schon drin ist)
+        already_in_chat = db.query(ChatParticipant).filter(
+            ChatParticipant.chat_id == chat_id,
+            ChatParticipant.username == data.new_username
+        ).first()
+        
+        if not already_in_chat:
+            new_participant = ChatParticipant(
+                chat_id=chat_id,
+                username=data.new_username,
+                # Wir können direkt die Standard-Einstellung des Users aus der DB übernehmen!
+                send_read_receipts=user_to_add.send_read_receipts_default 
+            )
+            db.add(new_participant)
+
+        # 4. Historische Schlüssel für den neuen User abspeichern
+        for key_data in data.historic_keys:
+            new_key = MessageKey(
+                message_id=key_data["message_id"],
+                username=data.new_username,
+                encrypted_sym_key=key_data["encrypted_sym_key"]
+            )
+            # db.merge() verhält sich in SQLAlchemy ähnlich wie "INSERT OR IGNORE" bzw. "UPSERT" in SQL.
+            # Wenn die Kombination aus message_id und username schon existiert, wird sie überschrieben.
+            # Wenn sie neu ist, wird sie hinzugefügt. Das verhindert Primary-Key-Crashes.
+            db.merge(new_key)
+        
+        # 5. Änderungen in die Datenbank schreiben
+        db.commit()
+        return generate_response(Status.OK, "User erfolgreich hinzugefügt und Historie geteilt.")
+
+    except Exception as e:
+        # GANZ WICHTIG in SQLAlchemy: Wenn ein Fehler passiert, MÜSSEN wir die 
+        # Transaktion zurückrollen, sonst bleibt die Session in einem fehlerhaften Zustand!
+        db.rollback()
+        print("Fehler beim Hinzufügen zum Chat:", e)
+        return generate_response(Status.ERROR, "Interner Datenbankfehler.")
+    
+
+@router.post("/api/chat/{chat_id}/leave")
+async def handle_leave_chat(request: Request, chat_id: int):
+    if not request.session.get("loggedIn"):
+        return generate_response(Status.USER_NOT_LOGGED_IN, "")
+    
+    current_user = request.session.get("username")
+    
+    try:
+        leave_chat(current_user, chat_id)
+        return generate_response(Status.OK, "")
+    except Exception:
+        return generate_response(Status.ERROR, "Fehler beim Verlassen des Chats.")
+
+@router.post("/api/user/delete")
+async def handle_delete_account(request: Request):
+    if not request.session.get("loggedIn"):
+        return generate_response(Status.USER_NOT_LOGGED_IN, "")
+    
+    current_user = request.session.get("username")
+    
+    try:
+        delete_user_account(current_user)
+        # Session leeren
+        request.session.clear()
+        
+        return generate_response(Status.OK, "")
+    except Exception:
+        return generate_response(Status.ERROR, "")

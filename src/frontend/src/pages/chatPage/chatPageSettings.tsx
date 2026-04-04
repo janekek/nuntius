@@ -8,17 +8,24 @@ import { Status } from "../../shared/Status";
 import type ServerResponse from "../../shared/ServerResponse";
 import LoadingPage from "../LoadingPage";
 import SearchUserComponent from "../../components/searchUserComponent/searchUserComponent";
+import { reWrapSessionKeysForNewUser } from "../../utils/cryptoUtils";
+import type { FullChat } from "../../shared/types";
+import type { SilentResponse } from "../../shared/ServerResponse";
 
 export default function ChatPageSettings({
   navigator,
   setToastMsg,
   chat_id,
   currentUsername,
+  chat,
+  privateKeyJwk,
 }: {
   navigator: NavigateFunction;
   setToastMsg: React.Dispatch<React.SetStateAction<string>>;
   chat_id: number;
   currentUsername: string;
+  chat: FullChat;
+  privateKeyJwk: any;
 }) {
   const [sendReadReceipts, setSendReadReceipts] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,11 +55,60 @@ export default function ChatPageSettings({
   }, []);
 
   const handleAddUser = (userToAdd: string) => {
-    //TODO
+    const keys = callAPI<ServerResponse<{ public_key: string }>>(
+      "/chat/get_user_public_key",
+      {
+        method: "POST",
+        body: JSON.stringify({ username: userToAdd }),
+      },
+    );
+    keys.then(async (res) => {
+      if (res.status.code === Status.OK.code) {
+        const public_key: string = res.content.public_key;
+        const new_user_messages = await reWrapSessionKeysForNewUser(
+          chat.messages,
+          currentUsername,
+          privateKeyJwk,
+          public_key,
+        );
+        const body = JSON.stringify({
+          new_username: userToAdd,
+          historic_keys: new_user_messages,
+        });
+        console.log(body);
+        const result = callAPI<ServerResponse<SilentResponse>>(
+          `/chat/${chat_id}/add_user`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              new_username: userToAdd,
+              historic_keys: new_user_messages,
+            }),
+          },
+        );
+        result.then((res) => {
+          if (res.status.code === Status.OK.code) {
+            console.log("yeahhhhhhhhhhh");
+          }
+        });
+      }
+    });
   };
 
   const handleLeaveChat = () => {
-    // TODO
+    const call = callAPI<ServerResponse<SilentResponse>>(
+      `/chat/${chat_id}/leave`,
+      {
+        method: "POST",
+      },
+    );
+    call.then((res) => {
+      console.log(res);
+      if (res.status.code === Status.OK.code) {
+        // setToastMsg("Left chat successfully.") //TODO toast weitergeben
+        navigator("/chats");
+      }
+    });
   };
 
   const toggleReceiptsMutation = useMutation({
