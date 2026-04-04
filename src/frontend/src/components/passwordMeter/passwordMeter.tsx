@@ -17,8 +17,8 @@ export default function PasswordMeter({ password }: { password: string }) {
   const colors = [
     "transparent",
     "var(--col-warning)",
-    "orange",
-    "yellowgreen",
+    "#d25f27",
+    "var(--col-primary-accent)",
     "var(--col-secondary)",
   ];
 

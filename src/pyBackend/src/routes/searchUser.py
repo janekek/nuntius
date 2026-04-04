@@ -13,4 +13,5 @@ class SearchRequest(BaseModel):
 async def search_user(request: Request, data: SearchRequest):
     prefix = data.searchUser
     result = search_users_by_prefix(prefix=prefix)
-    return generate_response(Status.OK, {"result": result})
+    result_data = [u.model_dump() for u in result]
+    return generate_response(Status.OK, {"result": result_data})

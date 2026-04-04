@@ -15,9 +15,3 @@
   transform: scale(1.05);
   cursor: pointer;
 }
-
-.container {
-  height: 70px;
-  width: 100%;
-  background-color: var(--bg-dark-main);
-}

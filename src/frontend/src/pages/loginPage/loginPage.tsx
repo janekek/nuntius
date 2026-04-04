@@ -1,18 +1,21 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import CorrectableInput from "../../components/CorrectableInput";
 import CustomButton from "../../components/customButton/CustomButton";
 import { useMutation } from "@tanstack/react-query";
 import type ServerResponse from "../../shared/ServerResponse";
 import { callAPI } from "../../utils/apiClient";
 import { LoginSchema } from "../../shared/schemas";
-
 import styles from "./loginPage.module.css";
 import ErrorBox from "../../components/errorBox/errorBox";
-import Logo from "../../components/logo/logo";
 import PageContainer from "../../components/pageContainer/pageContainer";
 import SinglePageContainer from "../../components/singlePageContainer/singlePageContainer";
 import Footer from "../../components/footer/footer";
+import { Status } from "../../shared/Status";
+import type { SilentResponse } from "../../shared/ServerResponse";
+import Toast from "../../components/toast/toast";
+import SiteContainer from "../../components/siteContainer/siteContainer";
+import MainMiddleComponent from "../../components/mainMiddleComponent/mainMiddleComponent";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -21,23 +24,58 @@ export default function LoginPage() {
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [serverErrorMsg, setServerErrorMsg] = useState("");
 
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const location = useLocation();
   const navigate = useNavigate();
+  const [toastMsg, setToastMsg] = useState(
+    location.state?.successMessage || "",
+  );
 
-  const mutation = useMutation({
-    mutationFn: async (): Promise<ServerResponse<String>> =>
+  // --- State löschen aus History, damit Toast beim Neuladen nicht nochmal kommt --->
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  // --- check auth and navigate to /chats if the user is loggedIn --->
+  useEffect(() => {
+    try {
+      const response = callAPI<ServerResponse<any>>("/isLoggedIn", {
+        method: "GET",
+      });
+      response.then((res) => {
+        console.log(res);
+        if (res.status.code === Status.OK.code) {
+          navigate("/chats");
+        }
+        setIsCheckingAuth(false);
+      });
+    } catch {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
+  const loginMutation = useMutation({
+    mutationFn: async (): Promise<ServerResponse<SilentResponse>> =>
       callAPI("/login", {
         method: "POST",
         body: JSON.stringify({ username, password }),
       }),
-    onSuccess: (response: ServerResponse<String>) => {
-      if (response?.status.code === 100) {
+    onSuccess: (response: ServerResponse<SilentResponse>) => {
+      if (response?.status.code === Status.OK.code) {
         navigate("/chats");
-      } else if (response?.status.code === 301) {
+      } else if (
+        response?.status.code ===
+        Status.LOGIN_USERNAME_OR_PASSWORD_INCORRECT.code
+      ) {
         setPassword("");
         setServerErrorMsg("Username oder Passwort falsch");
       }
     },
     onError: (error) => {
+      setPassword("");
+      setServerErrorMsg("Username oder Passwort falsch");
       console.error(error);
     },
   });
@@ -50,21 +88,29 @@ export default function LoginPage() {
       setShowAllErrors(true);
       return;
     }
-    mutation.mutate();
+    loginMutation.mutate();
   };
 
-  return (
-    <PageContainer>
-      <SinglePageContainer style={{ width: "100%", maxWidth: "400px" }}>
-        <header className="text-center">
-          <h1 className="m-0 text-[1.8rem] font-bold text-[var(--text-main)] tracking-[-0.02em]">
-            Welcome to Nuntius.
-          </h1>
-          <p className="m-0 mt-2 text-[var(--text-muted)] text-[0.95rem]">
-            Enter your data to log in.
-          </p>
-        </header>
+  if (isCheckingAuth) {
+    return <div>Überprüfe Login-Status...</div>;
+  }
 
+  return (
+    <SiteContainer>
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
+      <MainMiddleComponent
+        title="Welcome to Nuntius."
+        subtitle="Enter your data to log in."
+        maxWidth="400px"
+        footer={
+          <>
+            Don't have an account yet?{" "}
+            <Link to="/signup" className={styles.signupLink}>
+              Sign up here.
+            </Link>
+          </>
+        }
+      >
         <div className={"flex flex-col gap-6"}>
           <div className={"flex flex-col gap-4"}>
             <CorrectableInput
@@ -92,16 +138,7 @@ export default function LoginPage() {
             <CustomButton text="Login" onClick={handleLogin} />
           </div>
         </div>
-
-        <Footer>
-          <p className="m-0 text-[var(--text-muted)] text-[0.9rem]">
-            Don't have an account yet?{" "}
-            <Link to="/signup" className={styles.signupLink}>
-              Sign up here.
-            </Link>
-          </p>
-        </Footer>
-      </SinglePageContainer>
-    </PageContainer>
+      </MainMiddleComponent>
+    </SiteContainer>
   );
 }

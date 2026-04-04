@@ -1,25 +1,11 @@
-/* Globale Variablen & Basis (Identisch zur Übersicht) */
-.pageContainer {
-  background-color: var(--bg-dark-main);
-  color: var(--text-main);
-  min-height: calc(100vh - 70px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family:
-    "Inter",
-    system-ui,
-    -apple-system,
-    sans-serif;
-  padding: 1rem 1rem 1rem 1rem;
-}
-
 /* Chat App Container */
 .chatApp {
+  height: calc(100vh - 190px);
   width: 100%;
   max-width: 800px;
-  height: 90vh; /* Nimmt fast die ganze Höhe ein */
+  /* height: 90vh; Nimmt fast die ganze Höhe ein */
   background-color: var(--bg-dark-surface);
+  flex-grow: 1;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border-subtle);
@@ -132,10 +118,11 @@
   color: var(--text-muted);
   margin-bottom: 0.25rem;
   margin-left: 0.5rem;
+  font-weight: bold;
 }
 
 .messageBubble {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 0.5rem 1rem;
   border-radius: 14px;
   position: relative;
   display: inline-block;
@@ -161,12 +148,21 @@
   word-wrap: break-word;
 }
 
+.alignLeft {
+  text-align: left;
+}
+.alignRight {
+  text-align: right;
+}
+
+.flexEnd {
+  justify-content: flex-end;
+}
+
 .timestamp {
   display: block;
   font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.4);
-  margin-top: 0.4rem;
-  text-align: right;
 }
 
 /* Input Area (Unten fixiert) */
@@ -183,29 +179,6 @@
 .inputWrapper {
   flex-grow: 1;
   /* Stellt sicher, dass das CorrectableInput sich einpasst */
-}
-
-/* Senden Button */
-.sendButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 44px; /* Fixe Höhe, damit er bündig mit dem Input ist */
-  padding: 0 1.25rem;
-  /* background-color: var(--col-secondary); */
-  /* color: #000; */
-  /* border: none; */
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: none;
-}
-
-.sendButton:active {
-  transform: translateY(0);
 }
 
 /* Fallbacks */
@@ -245,16 +218,11 @@
   font-size: 0.9rem;
 }
 
-input {
-  width: 100%;
-}
-
 .messageFooter {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.4rem;
+  margin-top: 5px;
 }
 
 .receipt {
@@ -267,17 +235,8 @@ input {
   color: #4dabf7; /* Ein klassisches Messenger-Blau für "Gelesen" */
 }
 
-.typingIndicator {
-  font-size: 0.8rem;
-  color: var(--col-secondary);
-  font-style: italic;
-  position: absolute; /* Über dem Input-Feld platzieren */
-  bottom: 100%;
-  margin-bottom: 0.5rem;
-}
-
 .logoImage {
-  width: 25px; /* Oder wie groß du es haben möchtest */
-  height: 25px;
+  width: 16px; /* Oder wie groß du es haben möchtest */
+  height: 16px;
   display: block; /* Stellt sicher, dass das Zentrieren funktioniert */
 }

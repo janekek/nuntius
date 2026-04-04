@@ -30,9 +30,14 @@ class Status(Enum):
     USERNAME_TAKEN = StatusDetail(msg="The username is already taken", code=402)
     USERNAME_TOO_SHORT = StatusDetail(msg="The username is too short", code=403)
     PASSWORDS_MATCH = StatusDetail(msg="The password are not allowed to match", code=404)
+    USERNAME_INVALID = StatusDetail(msg="The username contains invalid characters", code=405)
+    PASSWORD_WEAK = StatusDetail(msg="The password does not meet the security requirements", code=406)
+    PASSWORD_INVALID = StatusDetail(msg="The password contains invalid characters", code=407)
+    USERNAME_TOO_LONG = StatusDetail(msg="The username is too long", code=408)
 
     # Chats
-    CHAT_NOT_FOUND = StatusDetail(msg="The requested chat does not exist", code=401)
+    CHAT_NOT_FOUND = StatusDetail(msg="The requested chat does not exist", code=501)
+    CHAT_ALREADY_EXISTS = StatusDetail(msg="The requested chat already exists", code=502)
 
     @property
     def msg(self) -> str:

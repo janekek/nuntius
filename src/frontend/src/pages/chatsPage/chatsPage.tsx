@@ -1,27 +1,31 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-
 import CenteredVertically from "../../components/CenteredVertically";
 import VerticalSpace from "../../components/VerticalSpace";
 import Input from "../../components/input/Input";
-
 import styles from "./chatsPage.module.css";
-import type { ChatsPackage } from "../../shared/ServerResponse";
+import {
+  type ChatsPackage,
+  type SearchMatch,
+} from "../../shared/ServerResponse";
 import type { FullChat } from "../../shared/types";
 import { callAPI } from "../../utils/apiClient";
 import type ServerResponse from "../../shared/ServerResponse";
-import NavBar from "../../components/navbar/NavBar";
+import { UserColor } from "../../shared/colors";
+import { Status } from "../../shared/Status";
+import Toast from "../../components/toast/toast";
+import StickyFooter from "../../components/stickyFooter/stickyFooter";
+import SiteContainer from "../../components/siteContainer/siteContainer";
+import SearchUserComponent from "../../components/searchUserComponent/searchUserComponent";
 
 export default function Chats() {
   const [username, setUsername] = useState<string>("");
   const [chats, setChats] = useState<FullChat[]>([]);
   const navigate = useNavigate();
-
   const [searchUser, setSearchUser] = useState("");
-  const [matches, setMatches] = useState<string[]>([]);
-  const [sendSearchUsernameText, setSendSearchUsernameText] =
-    useState<boolean>(false);
+  const [matches, setMatches] = useState<SearchMatch[]>([]);
+  const [toastMsg, setToastMsg] = useState("");
 
   const { data, isSuccess } = useQuery<ServerResponse<ChatsPackage>>({
     queryKey: ["page-chats", username],
@@ -32,12 +36,12 @@ export default function Chats() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (): Promise<ServerResponse<String>> =>
+    mutationFn: async (): Promise<ServerResponse<{ result: SearchMatch[] }>> =>
       callAPI("/searchUser", {
         method: "POST",
         body: JSON.stringify({ searchUser, username }),
       }),
-    onSuccess: (response: ServerResponse<any>) => {
+    onSuccess: (response: ServerResponse<{ result: SearchMatch[] }>) => {
       if (response?.status.code === 100) {
         if (response.content.result) {
           setMatches(response.content.result);
@@ -68,8 +72,48 @@ export default function Chats() {
     }
   }, [searchUser]);
 
+  const createChatMutation = useMutation({
+    mutationFn: async (
+      chat_username: string,
+    ): Promise<ServerResponse<{ chat_id: string }>> =>
+      callAPI("/createChat", {
+        method: "POST",
+        body: JSON.stringify({
+          chat_name: "",
+          participants: [username, chat_username],
+        }),
+      }),
+    onSuccess: (res) => {
+      switch (res.status.code) {
+        case Status.OK.code:
+          const chat_id = res.content.chat_id;
+          navigate(`/chats/${chat_id}`);
+          return;
+        case Status.CHAT_ALREADY_EXISTS.code:
+          console.log("big cock");
+          setToastMsg(res.status.msg);
+          return;
+        default:
+          setToastMsg(res.status.msg);
+      }
+    },
+    onError: (error) => {
+      console.error("Fehler beim Erstellen des Chats:", error);
+    },
+  });
+
+  function startChatWith(username: string) {
+    JSON.stringify({
+      chat_name: "",
+      participants: [username, "test"],
+    });
+
+    createChatMutation.mutate(username);
+  }
+
   return (
-    <div className={styles.pageContainer}>
+    <SiteContainer>
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
       <div className={styles.dashboard}>
         <CenteredVertically
           content={
@@ -106,7 +150,14 @@ export default function Chats() {
                         <div className={styles.chatInfo}>
                           <div className={styles.avatarGroup}>
                             {chat.participants.slice(0, 2).map((p, i) => (
-                              <div key={i} className={styles.avatar}>
+                              <div
+                                key={i}
+                                className={styles.avatar}
+                                style={{
+                                  background: UserColor.getColorById(p.color_id)
+                                    .rgb,
+                                }}
+                              >
                                 {p.username.charAt(0).toUpperCase()}
                               </div>
                             ))}
@@ -153,53 +204,23 @@ export default function Chats() {
 
               <div className={styles.section}>
                 <h2 className={styles.sectionTitle}>Start new chat</h2>
-                <div className={styles.searchContainer}>
-                  <Input
-                    type="text"
-                    placeholder="Benutzername suchen..."
-                    value={searchUser}
-                    onChange={(e) => {
-                      setSearchUser(e.target.value);
-                      if (e.target.value.trim() !== "") {
-                        setSendSearchUsernameText(false);
-                      }
-                    }}
-                  />
-                </div>
 
-                {searchUser.length >= 3 && (
-                  <div className={styles.searchResults}>
-                    <p className={styles.resultMeta}>
-                      {matches.length} {matches.length === 1 ? "user" : "users"}{" "}
-                      found
-                    </p>
-                    <div className={styles.matchList}>
-                      {matches.map((match: string) => (
-                        <div key={match} className={styles.matchCard}>
-                          <div className={styles.matchInfo}>
-                            <div className={styles.avatar}>
-                              {match.charAt(0).toUpperCase()}
-                            </div>
-                            <span>{match}</span>
-                          </div>
-                          <button
-                            className={styles.actionButton}
-                            onClick={() =>
-                              console.log("Chat mit", match, "starten")
-                            }
-                          >
-                            Chat
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <SearchUserComponent
+                  username={username}
+                  onClick={(match) => startChatWith(match.username)}
+                />
               </div>
             </>
           }
         />
       </div>
-    </div>
+      <StickyFooter
+        navigator={navigate}
+        setToastMsg={setToastMsg}
+        settingsBtnActive={false}
+        settingsBtnOnClick={() => navigate("/settings")}
+        maxWidth="600px"
+      />
+    </SiteContainer>
   );
 }

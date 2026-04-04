@@ -13,8 +13,8 @@ import uvicorn
 
 from src.utils.status import Status 
 from src.utils.server_response import generate_response, generate_ws_payload
-from src.database.databaseOperations import create_chat_with_users, set_user_last_read_message
-from src.routes import login, logout, signup, chats, chat, searchUser, createChat
+from src.database.databaseOperations import create_chat_with_users, set_user_last_read_message, set_user_color
+from src.routes import login, logout, signup, chats, chat, searchUser, createChat, color, receipts, settings
 from src.chat.receiveChat import handle_send_message
 
 SESSION_COOKIE_NAME = "session"
@@ -32,14 +32,19 @@ app.add_middleware(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    # allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins="http://localhost:3000")
+sio = socketio.AsyncServer(
+    async_mode='asgi', 
+    # cors_allowed_origins="http://localhost:3000"
+    cors_allowed_origins="*"
+)
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
 
@@ -76,10 +81,15 @@ app.include_router(chats.router)
 app.include_router(chat.router)
 app.include_router(searchUser.router)
 app.include_router(createChat.router)
+app.include_router(color.router)
+app.include_router(receipts.router)
+app.include_router(settings.router)
 
 @app.get("/api/database")
 async def handle_database(request: Request):
-    response = create_chat_with_users("First chat", ["Janek", "Timon"])
+    response = set_user_color("Janek", 1)
+    set_user_color("Timon", 2)
+    set_user_color("Frank", 3)
     # response = run_sql_code(data.command)
     return generate_response(Status.OK, response)
 

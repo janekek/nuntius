@@ -2,7 +2,7 @@ from sqlalchemy import text
 # Nimm an, dass 'db' jetzt deine SQLAlchemy Session ist
 from src.database.database import db 
 from src.utils.status import Status
-from src.utils.myTypes import EnhancedUser, FullChat, Message, ChatParticipant
+from src.utils.myTypes import EnhancedUser, FullChat, Message, ChatParticipant, SearchMatch
 from typing import List, Optional
 
 # Hier musst du deine SQLAlchemy-Models importieren (Pfade ggf. anpassen)
@@ -27,7 +27,8 @@ def create_user(user: EnhancedUser) -> Status:
         password_hash=user.password_hash,
         public_key=user.public_key,
         encrypted_private_key=user.encrypted_private_key,
-        iv_private_key=user.iv_private_key
+        iv_private_key=user.iv_private_key,
+        color_id=user.color_id
     )
     db.add(new_user)
     db.commit()
@@ -52,8 +53,13 @@ def create_chat_without_users(chat_name: str) -> int:
 
 def create_chat_with_users(chat_name: str, users: List[str]) -> int:
     new_chat_id = create_chat_without_users(chat_name)
-    for user in users:
+    new_chat_id = create_chat_without_users(chat_name)
+    
+    unique_users = set(users) 
+    
+    for user in unique_users:
         add_user_to_chat(new_chat_id, user)
+        
     return new_chat_id
 
 def add_user_to_chat(chat_id: int, user: str) -> None:
@@ -74,9 +80,12 @@ def add_message_to_chat(chat_id: int, sender_username: str, content: str) -> Non
     db.add(new_msg)
     db.commit()
 
-def search_users_by_prefix(prefix: str) -> List[str]:
+def search_users_by_prefix(prefix: str) -> List[SearchMatch]:
     users = db.query(User).filter(User.username.like(f"{prefix}%")).all()
-    return [u.username for u in users]
+    return [
+        SearchMatch(username=u.username, color_id = u.color_id)
+        for u in users
+    ]
 
 def get_user_chats(username: str) -> List[dict]:
     # Join zwischen Chat und ChatParticipant
@@ -98,10 +107,11 @@ def get_chat_participants(chat_id: int) -> List[ChatParticipant]:
         last_read = p.last_read_message_id
         if not p.send_read_receipts:
             last_read = 0
-
+        color_id =get_user_color(p.username)
         chat_participant = ChatParticipant(
             username=p.username,
-            last_read_message_id=last_read
+            last_read_message_id=last_read,
+            color_id=color_id
         )
         participants_data.append(chat_participant)
     
@@ -127,7 +137,7 @@ def get_chat_messages(chat_id: int, current_user: str) -> List[Message]:
             content=msg.encrypted_content, 
             iv=msg.iv,
             keys=[{"username": current_user, "encryptedKey": key.encrypted_sym_key}],
-            # Convert datetime to string. Handle potential None values just in case.
+            # [there was an error] Convert datetime to string. Handle potential None values just in case.
             timestamp=msg.timestamp.isoformat() if msg.timestamp else "" 
         ) for msg, key in results
     ]
@@ -227,3 +237,83 @@ def set_user_send_read_receipts(username: str, chat_id: int, send_receipts: bool
 def get_user_send_read_receipts(username: str, chat_id: int) -> Optional[bool]:
     participant = db.query(ChatParticipantModel).filter_by(username=username, chat_id=chat_id).first()
     return participant.send_read_receipts if participant else None
+
+def get_user_send_read_receipt_default(username: str):
+    """
+    Gibt den Standardwert für Lesebestätigungen zurück.
+    Gibt True zurück, falls der User nicht gefunden wird (als sicherer Default).
+    """
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        return user.send_read_receipts_default
+    return True
+
+def set_user_send_read_receipt_default(username: str, enabled: bool):
+    """
+    Aktualisiert die globale Einstellung für Lesebestätigungen eines Nutzers.
+    """
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        try:
+            user.send_read_receipts_default = enabled
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Fehler beim Aktualisieren der Lesebestätigung: {e}")
+            return False
+    return False
+
+def exists_chat_with_users(users: List[str]) -> bool:
+    if not users:
+        return False
+    
+    # 1. Ziel-Menge als Set definieren (für einfachen "genau gleich"-Vergleich)
+    target_users = set(users)
+    first_user = users[0]
+    
+    # 2. Kandidaten finden: Hole alle chat_ids, in denen zumindest der erste User ist.
+    # Das reduziert die Datenbankabfrage enorm, da wir nicht alle Chats durchsuchen müssen.
+    candidate_chats = db.query(ChatParticipantModel.chat_id).filter(
+        ChatParticipantModel.username == first_user
+    ).all()
+    
+    candidate_chat_ids = [chat.chat_id for chat in candidate_chats]
+    
+    if not candidate_chat_ids:
+        return False # Der User ist in gar keinem Chat -> also gibt es auch keinen solchen Chat
+
+    # 3. Überprüfe die Kandidaten-Chats auf exakte Übereinstimmung
+    for chat_id in candidate_chat_ids:
+        # Hole alle Usernamen für diesen spezifischen Chat
+        participants = db.query(ChatParticipantModel.username).filter(
+            ChatParticipantModel.chat_id == chat_id
+        ).all()
+        
+        # Erstelle ein Set aus den gefundenen Usernamen
+        current_chat_users = set(p.username for p in participants)
+        
+        # Wenn die Sets exakt übereinstimmen (nicht mehr, nicht weniger), haben wir den Chat gefunden!
+        if current_chat_users == target_users:
+            return True
+            
+    return False
+
+def get_user_color(username: str):
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        return user.color_id
+    return None
+
+def set_user_color(username: str, color_id: int):
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        try:
+            user.color_id = color_id
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            print(f"Fehler beim Speichern: {e}")
+            return False
+    return False

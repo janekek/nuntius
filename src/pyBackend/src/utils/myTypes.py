@@ -7,6 +7,7 @@ class EnhancedUser(BaseModel):
     public_key: str
     encrypted_private_key: str # NEU
     iv_private_key: str
+    color_id: int
 
 class Message(BaseModel):
     id: Optional[int] = None
@@ -33,3 +34,8 @@ class FullChat(BaseModel):
 class ChatParticipant (BaseModel):
     username: str
     last_read_message_id: int
+    color_id: int
+
+class SearchMatch (BaseModel):
+    username: str
+    color_id: int

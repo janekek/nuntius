@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import styles from "./chatPage.module.css";
 import CorrectableInput from "../../components/CorrectableInput";
@@ -30,6 +30,13 @@ import Footer from "../../components/footer/footer";
 import NewMessagesHR from "../../components/newMessagesHR/newMessagesHR";
 
 import doubleTick from "../../img/double-tick-2.png";
+import Toast from "../../components/toast/toast";
+import LogoutBtn from "../../components/logoutBtn/logoutBtn";
+import StickyFooter from "../../components/stickyFooter/stickyFooter";
+import ChatPageSettings from "./chatPageSettings";
+import ChatPageLocked from "./chatPageLocked";
+import SiteContainer from "../../components/siteContainer/siteContainer";
+import { UserColor } from "../../shared/colors";
 
 const socket = io("http://localhost:5000", {
   withCredentials: true,
@@ -57,6 +64,10 @@ function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // --- Settings & UI States ---
+  const [showSettings, setShowSettings] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+
   const { data, isSuccess, isLoading, isError } = useQuery<
     ServerResponse<ChatPackage>
   >({
@@ -66,7 +77,7 @@ function ChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat?.messages]);
+  }, [chat?.messages, showSettings]);
 
   //Lesebestätigung senden
   useEffect(() => {
@@ -174,7 +185,7 @@ function ChatPage() {
       const keysRes: any = await callAPI("/user/keys", { method: "GET" });
 
       if (keysRes.status.code !== 100) {
-        setUnlockError("Konnte Schlüssel nicht vom Server abrufen.");
+        setUnlockError("Unable to retrieve the key from the server.");
         setUnlocking(false);
         return;
       }
@@ -201,7 +212,7 @@ function ChatPage() {
       setIsUnlocked(true); // Chat öffnet sich
     } catch (err) {
       console.error(err);
-      setUnlockError("Falsches Secret Password! Zugriff verweigert.");
+      setUnlockError("Incorrect password. Access denied.");
     } finally {
       setUnlocking(false);
     }
@@ -209,49 +220,21 @@ function ChatPage() {
 
   if (isLoading || !rawChatData) return <LoadingPage />;
   if (isError)
-    return <div className={styles.errorState}>Fehler beim Laden.</div>;
+    return <div className={styles.errorState}>Error while loading.</div>;
 
-  // --- UI: ENTSPERR SCREEN ---
+  // --- UI: Unlockscreen -->
   if (!isUnlocked) {
     return (
-      <PageContainer>
-        <SinglePageContainer style={{ maxWidth: "400px" }}>
-          <header className={styles.header}>
-            <h1 className={styles.title}>Chat gesperrt</h1>
-            <p className={styles.subtitle}>
-              Bitte gib dein Secret Password ein, um deine Schlüssel vom Server
-              zu laden und den Chat zu entsperren.
-            </p>
-          </header>
-          <div className={styles.inputGroup}>
-            <Input
-              type="password"
-              placeholder="Secret Password"
-              value={secretPassword}
-              onChange={(e) => setSecretPassword(e.target.value)}
-              onEnter={handleUnlock}
-            />
-          </div>
-
-          <ErrorBox>{unlockError}</ErrorBox>
-
-          <CustomButton
-            text={unlocking ? "Entschlüsseln..." : "Entsperren"}
-            onClick={handleUnlock}
-          />
-          <Footer>
-            <p className={styles.signupText}>
-              <Link to="/chats" className={styles.signupLink}>
-                Back to chats.
-              </Link>
-            </p>
-          </Footer>
-        </SinglePageContainer>
-      </PageContainer>
+      <ChatPageLocked
+        handleUnlock={handleUnlock}
+        unlockError={unlockError}
+        unlocking={unlocking}
+        secretPassword={secretPassword}
+        setSecretPassword={setSecretPassword}
+      />
     );
   }
 
-  // --- UI: CHAT (Wie vorher) ---
   async function submitChat() {
     const result = ChatSchema.safeParse({ chatMessage });
     if (!result.success) {
@@ -277,8 +260,10 @@ function ChatPage() {
     setChatMessage("");
   }
 
+  // --- UI: chat -->
   return (
-    <div className={styles.pageContainer}>
+    <SiteContainer>
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg("")} />}
       <div className={styles.chatApp}>
         <header className={styles.chatHeader}>
           <div className={styles.headerInfo}>
@@ -287,7 +272,13 @@ function ChatPage() {
                 .filter((p) => p.username !== currentUsername)
                 .slice(0, 2)
                 .map((p, i) => (
-                  <div key={i} className={styles.avatar}>
+                  <div
+                    key={i}
+                    className={styles.avatar}
+                    style={{
+                      background: UserColor.getColorById(p.color_id).rgb,
+                    }}
+                  >
                     {p.username.charAt(0).toUpperCase()}
                   </div>
                 ))}
@@ -316,106 +307,114 @@ function ChatPage() {
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Zurück
+            Back
           </Link>
         </header>
 
-        <div className={styles.chatWindow}>
-          <div className={styles.messageSpacer}></div>
-          {chat?.messages.map((m, i) => {
-            const isOwn = m.sender_username === currentUsername;
-            const last_read_message_id = chat.last_read_message_id;
-            let displayHR = false;
-            if (m.id > last_read_message_id) {
-              const hasSmallerUnreadMessage = chat.messages.some(
-                (otherMsg) =>
-                  otherMsg.id > last_read_message_id && otherMsg.id < m.id,
-              );
-              if (!hasSmallerUnreadMessage) displayHR = true;
-            }
-            let show_is_read = false;
-            if (isOwn) {
-              const otherParticipants = chat.participants.filter(
-                (p) => p.username !== currentUsername,
-              );
-              if (otherParticipants.length > 0) {
-                const isReadByAll = otherParticipants.every(
-                  (p) => m.id <= p.last_read_message_id,
-                );
-                if (isReadByAll) {
-                  show_is_read = true; // Nachricht wurde von allen anderen gelesen
+        {showSettings ? (
+          <ChatPageSettings
+            chat_id={+chatID!}
+            navigator={navigate}
+            setToastMsg={setToastMsg}
+            currentUsername={currentUsername}
+          />
+        ) : (
+          <>
+            <div className={styles.chatWindow}>
+              <div className={styles.messageSpacer}></div>
+              {chat?.messages.map((m, i) => {
+                const isOwn = m.sender_username === currentUsername;
+                const last_read_message_id = chat.last_read_message_id;
+                let displayHR = false;
+                if (m.id > last_read_message_id) {
+                  const hasSmallerUnreadMessage = chat.messages.some(
+                    (otherMsg) =>
+                      otherMsg.id > last_read_message_id && otherMsg.id < m.id,
+                  );
+                  if (!hasSmallerUnreadMessage) displayHR = true;
                 }
-              }
-            }
-            return (
-              <React.Fragment key={i}>
-                {displayHR && <NewMessagesHR></NewMessagesHR>}
-                <div
-                  className={`${styles.messageWrapper} ${isOwn ? styles.messageOwn : styles.messageOther}`}
-                >
-                  {!isOwn && (
-                    <span className={styles.senderName}>
-                      {m.sender_username}
-                    </span>
-                  )}
-                  <div className={styles.messageBubble}>
-                    <p className={styles.messageContent}>{m.content}</p>
-                    <div className={styles.messageFooter}>
-                      <span className={styles.timestamp}>
-                        {formatSmartDate(m.timestamp)}
-                      </span>
-                      {show_is_read && (
-                        <>
-                          <img
-                            src={doubleTick}
-                            alt="Read"
-                            className={styles.logoImage}
-                          />
-                        </>
+                let show_is_read = false;
+                if (isOwn) {
+                  const otherParticipants = chat.participants.filter(
+                    (p) => p.username !== currentUsername,
+                  );
+                  if (otherParticipants.length > 0) {
+                    const isReadByAll = otherParticipants.every(
+                      (p) => m.id <= p.last_read_message_id,
+                    );
+                    if (isReadByAll) {
+                      show_is_read = true; // Nachricht wurde von allen anderen gelesen
+                    }
+                  }
+                }
+                return (
+                  <React.Fragment key={i}>
+                    {displayHR && <NewMessagesHR></NewMessagesHR>}
+                    <div
+                      className={`${styles.messageWrapper} ${isOwn ? styles.messageOwn : styles.messageOther}`}
+                    >
+                      {!isOwn && (
+                        <span className={styles.senderName}>
+                          {m.sender_username}
+                        </span>
                       )}
+                      <div className={styles.messageBubble}>
+                        <p
+                          className={`${styles.messageContent} ${isOwn ? styles.alignRight : styles.alignLeft}`}
+                        >
+                          {m.content}
+                        </p>
+                        <div
+                          className={`${styles.messageFooter} ${isOwn ? styles.flexEnd : " "}`}
+                        >
+                          <span className={`${styles.timestamp}`}>
+                            {formatSmartDate(m.timestamp)}
+                          </span>
+                          {show_is_read && (
+                            <>
+                              <img
+                                src={doubleTick}
+                                alt="Read"
+                                className={styles.logoImage}
+                              />
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </React.Fragment>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className={styles.inputArea}>
-          <div className={styles.inputWrapper}>
-            <CorrectableInput
-              key={messageCount}
-              type="text"
-              placeholder="Schreibe eine Nachricht..."
-              value={chatMessage}
-              onChange={setChatMessage}
-              schema={ChatSchema.shape.chatMessage}
-              forceShowError={showAllErrors}
-              onEnter={submitChat}
-              // Falls dein CorrectableInput eine className Prop nimmt, übergib hier eine:
-              // className={styles.textInput}
-            />
-          </div>
-          <button className={styles.sendButton} onClick={submitChat}>
-            Senden
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-          </button>
-        </div>
+                  </React.Fragment>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className={styles.inputArea}>
+              <div className={styles.inputWrapper}>
+                <CorrectableInput
+                  key={messageCount}
+                  type="text"
+                  placeholder="Message..."
+                  value={chatMessage}
+                  onChange={setChatMessage}
+                  forceShowError={showAllErrors}
+                  onEnter={submitChat}
+                  // Falls dein CorrectableInput eine className Prop nimmt, übergib hier eine:
+                  // className={styles.textInput}
+                />
+              </div>
+              <button onClick={submitChat}>Send</button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+      {/* STICKY FOOTER */}
+      <StickyFooter
+        maxWidth="800px"
+        navigator={navigate}
+        setToastMsg={setToastMsg}
+        settingsBtnActive={showSettings}
+        settingsBtnOnClick={() => setShowSettings(!showSettings)}
+      />
+    </SiteContainer>
   );
 }
 

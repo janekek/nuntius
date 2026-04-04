@@ -1,25 +1,23 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-
 import CorrectableInput from "../../components/CorrectableInput";
 import CustomButton from "../../components/customButton/CustomButton";
-
 import styles from "./signUpPage.module.css";
 import { callAPI } from "../../utils/apiClient";
 import type ServerResponse from "../../shared/ServerResponse";
 import { SignupSchema } from "../../shared/schemas";
 import ErrorBox from "../../components/errorBox/errorBox";
 import PasswordMeter from "../../components/passwordMeter/passwordMeter";
-
-// --- Krypto-Imports (stelle sicher, dass du arrayBufferToBase64 etc. in cryptoUtils.ts hast) ---
 import {
   generateKeyPairFromPassword,
   deriveKeyFromPassword,
   arrayBufferToBase64,
 } from "../../utils/cryptoUtils";
-import PageContainer from "../../components/pageContainer/pageContainer";
-import Footer from "../../components/footer/footer";
+import type { SilentResponse } from "../../shared/ServerResponse";
+import { Status } from "../../shared/Status";
+import SiteContainer from "../../components/siteContainer/siteContainer";
+import MainMiddleComponent from "../../components/mainMiddleComponent/mainMiddleComponent";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
@@ -31,24 +29,36 @@ export default function SignUpPage() {
 
   const navigate = useNavigate();
 
-  const mutation = useMutation({
-    mutationFn: async (payload: any): Promise<ServerResponse<String>> =>
+  const signUpMutation = useMutation({
+    mutationFn: async (payload: any): Promise<ServerResponse<SilentResponse>> =>
       callAPI("/signup", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
-    onSuccess: (response: ServerResponse<String>) => {
-      if (response?.status.code !== 100) {
-        setServerErrorMsg(response?.status.msg + "");
+    onSuccess: (response: ServerResponse<SilentResponse>) => {
+      if (response?.status.code === Status.OK.code) {
+        navigate("/", {
+          state: {
+            successMessage: "Account created successfully! You can now log in.",
+          },
+        });
+      } else if (response.status.code === Status.ERROR.code) {
+        setServerErrorMsg(
+          "An unexpected error has occurred. Try again or check the console for more details",
+        );
         setPassword("");
         setPassword2("");
       } else {
-        navigate("/");
+        setServerErrorMsg(response?.status.msg + "");
+        setPassword("");
+        setPassword2("");
       }
     },
     onError: (error) => {
+      setServerErrorMsg(
+        "An unexpected error has occurred. Try again or check the console for more details",
+      );
       console.error(error);
-      setServerErrorMsg("Ein unerwarteter Fehler ist aufgetreten.");
     },
   });
 
@@ -68,7 +78,7 @@ export default function SignUpPage() {
       );
       const publicKeyStr = JSON.stringify(publicKey);
 
-      // 2. Private Key mit dem Secret Password (AES) verschlüsseln
+      // Private Key mit dem Secret Password (AES) verschlüsseln
       const aesKey = await deriveKeyFromPassword(password2, username);
       const iv = window.crypto.getRandomValues(new Uint8Array(12));
       const encPrivBuffer = await window.crypto.subtle.encrypt(
@@ -77,28 +87,36 @@ export default function SignUpPage() {
         new TextEncoder().encode(JSON.stringify(privateKey)),
       );
 
-      mutation.mutate({
+      signUpMutation.mutate({
         username,
         password,
         password2,
         public_key: publicKeyStr,
         encrypted_private_key: arrayBufferToBase64(encPrivBuffer),
         iv_private_key: arrayBufferToBase64(iv.buffer),
+        color_id: "0",
       });
     } catch (err) {
-      console.error("Fehler bei der Schlüsselgenerierung:", err);
-      setServerErrorMsg("Verschlüsselungs-Setup fehlgeschlagen.");
+      console.error("Error during key generation:", err);
+      setServerErrorMsg("Encryption setup failed.");
     }
   };
 
   return (
-    <PageContainer>
-      <div className={styles.signUpCard}>
-        <header className="text-center">
-          <h1 className={styles.title}>Join Nuntius</h1>
-          <p className={styles.subtitle}>Create your secure account.</p>
-        </header>
-
+    <SiteContainer>
+      <MainMiddleComponent
+        title="Join Nuntius"
+        subtitle="Create your secure account."
+        maxWidth="550px"
+        footer={
+          <>
+            Already have an account?{" "}
+            <Link to="/" className={styles.loginLink}>
+              Log in here.
+            </Link>
+          </>
+        }
+      >
         <div className={styles.infoBox}>
           <p className={styles.infoLead}>
             Nuntius is built on a simple philosophy:{" "}
@@ -145,8 +163,12 @@ export default function SignUpPage() {
               placeholder="Secret Encryption Password"
               value={password2}
               onChange={setPassword2}
-              schema={SignupSchema.shape.password2}
+              schema={SignupSchema.shape.password2.refine(
+                (val) => val !== password,
+                "Passwords cannot be identical",
+              )}
               forceShowError={showAllErrors}
+              onEnter={handleSignUp}
             />
             <PasswordMeter password={password2} />
           </div>
@@ -157,16 +179,7 @@ export default function SignUpPage() {
             <CustomButton text="Sign up" onClick={handleSignUp} />
           </div>
         </div>
-
-        <Footer>
-          <p className={styles.loginText}>
-            Already have an account?{" "}
-            <Link to="/" className={styles.loginLink}>
-              Log in here.
-            </Link>
-          </p>
-        </Footer>
-      </div>
-    </PageContainer>
+      </MainMiddleComponent>
+    </SiteContainer>
   );
 }

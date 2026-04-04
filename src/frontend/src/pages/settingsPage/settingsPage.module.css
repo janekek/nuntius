@@ -1,0 +1,159 @@
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settingItem,
+.settingItemColor {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.settingItemColor {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.settingInfo {
+  flex-grow: 1;
+}
+
+.settingTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.settingDesc {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Toggle Switch Styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: 0.3s;
+  border-radius: 34px;
+  border: 1px solid var(--border-subtle);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-muted);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: var(--col-secondary);
+  border-color: var(--col-secondary);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+  background-color: #fff;
+}
+
+/* Color Picker Styling */
+.colorPicker {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-self: center;
+}
+
+.colorSwatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.1);
+}
+
+.activeSwatch {
+  box-shadow:
+    0 0 0 3px var(--bg-dark-surface),
+    0 0 0 5px var(--text-main);
+}
+
+.checkIcon {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+  /* Kleiner Textschatten, falls die ausgewählte Farbe sehr hell ist */
+  filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Danger Zone */
+.settingItemDanger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: rgba(190, 21, 21, 0.05);
+  border: 1px solid rgba(190, 21, 21, 0.2);
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.settingTitleDanger {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--col-warning);
+}
+
+.dangerBtn {
+  background-color: transparent;
+  color: var(--col-warning);
+  border: 1px solid var(--col-warning);
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dangerBtn:hover {
+  background-color: var(--col-warning);
+  color: #fff;
+}

@@ -1,7 +1,7 @@
 const BASE_URL = "http://localhost:5000/api";
 
 interface RequestParameters {
-  method: "POST" | "GET";
+  method: "POST" | "GET" | "PATCH" | "PUT";
   include_credentials?: boolean;
   body?: any;
 }

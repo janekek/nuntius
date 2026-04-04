@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    font-family: "Poppins", sans-serif;
+  }
+  body {
+    background-color: var(--bg-dark-main);
+    color: var(--text-main);
+  }
   button {
     padding: 4px 15px;
     color: var(--col-primary-accent);
@@ -18,7 +29,7 @@
   }
   input {
     outline: none;
-    padding: 6px 8px;
+    padding: 6px 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
@@ -42,4 +53,41 @@
     color: #79e334; /* Helleres Grün */
     text-decoration: underline;
   }
+}
+
+/* --- colors ---> */
+:root {
+  --col-primary: rgb(27, 48, 60);
+  --col-secondary: rgb(100, 196, 40);
+  --col-primary-accent: rgb(208, 206, 59);
+  --col-warning: rgb(190, 21, 21);
+  --bg-dark-main: #0f0f0f;
+  --bg-dark-surface: #1a1a1c;
+  --text-main: #f0f6fc;
+  --text-muted: #d2d5d8;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+}
+
+/* --- fonts ---> */
+@font-face {
+  font-family: "Poppins";
+  src: url(./fonts/Poppins-Regular.ttf);
+}
+@font-face {
+  font-family: "Code";
+  src: url(./fonts/SourceCodePro-Regular.ttf);
+}
+@font-face {
+  font-family: "Warzone";
+  src: url(./fonts/Warzone.ttf);
+}
+@font-face {
+  font-family: "TeX";
+  src: url(./fonts/TeX.ttf);
+  font-weight: 400;
+}
+@font-face {
+  font-family: "TeX";
+  src: url(./fonts/TeX-bold.ttf);
+  font-weight: 700;
 }

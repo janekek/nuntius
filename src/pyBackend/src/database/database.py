@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, func
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, ForeignKey, func, text
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 Base = declarative_base()
@@ -15,6 +15,8 @@ class User(Base):
     public_key = Column(String, nullable=False)
     encrypted_private_key = Column(String, nullable=False)
     iv_private_key = Column(String, nullable=False)
+    color_id = Column(Integer, default=0, nullable=False)
+    send_read_receipts_default = Column(Boolean, default=True, nullable=False)
 
 class Chat(Base):
     __tablename__ = "chats"
