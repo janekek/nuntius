@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.janek-zeiger.com/";
+const BASE_URL = "https://api.janek-zeiger.com";
 
 interface RequestParameters {
   method: "POST" | "GET" | "PATCH" | "PUT";

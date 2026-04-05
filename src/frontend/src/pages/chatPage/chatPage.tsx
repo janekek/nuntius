@@ -38,7 +38,7 @@ import ChatPageLocked from "./chatPageLocked";
 import SiteContainer from "../../components/siteContainer/siteContainer";
 import { UserColor } from "../../shared/colors";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://api.janek-zeiger.com", {
   withCredentials: true,
   autoConnect: false,
 });
