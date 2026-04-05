@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "app:socket_app", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:5000"]W
+CMD gunicorn app:socket_app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000

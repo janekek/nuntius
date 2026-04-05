@@ -1,10 +1,7 @@
-GET http://localhost:5000/api/database
+POST http://192.168.2.131:5000/api/login
 Content-Type: application/json
 
-# {
-#     "username": "Janek2",
-#     "password": "123",
-#     "password2" : "23 4",
-#     "public_key": "str",
-#     "encrypted_private_key": "str"
-# }
+{
+    "username": "Janek2",
+    "password": "123"
+}
