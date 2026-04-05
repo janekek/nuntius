@@ -8,7 +8,7 @@ router = APIRouter()
 class ReceiptsRequest(BaseModel):
     send_read_receipts_default: bool
 
-@router.put("/api/receipts")
+@router.put("/receipts")
 async def search_user(request: Request, data: ReceiptsRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -27,7 +27,7 @@ class ReceiptsChatRequest(BaseModel):
     send_read_receipts: bool
     chat_id: int
 
-@router.put("/api/receiptsChat")
+@router.put("/receiptsChat")
 async def search_user(request: Request, data: ReceiptsChatRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")

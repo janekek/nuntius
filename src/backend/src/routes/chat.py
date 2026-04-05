@@ -10,7 +10,7 @@ from src.database.databaseOperations import db
 
 router = APIRouter()
 
-@router.get("/api/chat/{chat_id}")
+@router.get("/chat/{chat_id}")
 async def handle_single_chat(request: Request, chat_id: str = Path(...)):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -35,7 +35,7 @@ async def handle_single_chat(request: Request, chat_id: str = Path(...)):
         "fullChat": full_chat.model_dump() if full_chat else None
     })
 
-@router.get("/api/chat/{chat_id}/keys")
+@router.get("/chat/{chat_id}/keys")
 async def handle_get_chat_keys(request: Request, chat_id: int):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -45,7 +45,7 @@ async def handle_get_chat_keys(request: Request, chat_id: int):
     return generate_response(Status.OK, {"keys": keys})
 
 
-@router.get("/api/user/keys")
+@router.get("/user/keys")
 async def handle_get_my_keys(request: Request):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -61,7 +61,7 @@ async def handle_get_my_keys(request: Request):
 class GetUserPublicKeyRequest(BaseModel):
     username: str
 
-@router.post("/api/chat/get_user_public_key")
+@router.post("/chat/get_user_public_key")
 async def user_public_key(request: Request, data: GetUserPublicKeyRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -73,7 +73,7 @@ class AddUserRequest(BaseModel):
     new_username: str
     historic_keys: List[dict]
 
-@router.post("/api/chat/{chat_id}/add_user")
+@router.post("/chat/{chat_id}/add_user")
 async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserRequest):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -135,7 +135,7 @@ async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserR
         return generate_response(Status.ERROR, "Interner Datenbankfehler.")
     
 
-@router.post("/api/chat/{chat_id}/leave")
+@router.post("/chat/{chat_id}/leave")
 async def handle_leave_chat(request: Request, chat_id: int):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -148,7 +148,7 @@ async def handle_leave_chat(request: Request, chat_id: int):
     except Exception:
         return generate_response(Status.ERROR, "Fehler beim Verlassen des Chats.")
 
-@router.post("/api/user/delete")
+@router.post("/user/delete")
 async def handle_delete_account(request: Request):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")

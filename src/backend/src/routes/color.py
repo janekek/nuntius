@@ -8,7 +8,7 @@ router = APIRouter()
 class PutColorRequest(BaseModel):
     color_id: int
 
-@router.put("/api/color")
+@router.put("/color")
 async def search_user(request: Request, data: PutColorRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")

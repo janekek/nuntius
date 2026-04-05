@@ -11,7 +11,7 @@ class CreateChatRequest(BaseModel):
     chat_name: str
     participants: list[str]
 
-@router.post("/api/createChat")
+@router.post("/createChat")
 async def handle_login(request: Request, data: CreateChatRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")

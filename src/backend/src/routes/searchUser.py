@@ -9,7 +9,7 @@ router = APIRouter()
 class SearchRequest(BaseModel):
     searchUser: str
 
-@router.post("/api/searchUser")
+@router.post("/searchUser")
 async def search_user(request: Request, data: SearchRequest):
     prefix = data.searchUser
     result = search_users_by_prefix(prefix=prefix)

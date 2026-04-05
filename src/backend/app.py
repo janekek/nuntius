@@ -92,7 +92,7 @@ app.include_router(color.router)
 app.include_router(receipts.router)
 app.include_router(settings.router)
 
-@app.get("/api/database")
+@app.get("/database")
 async def handle_database(request: Request):
     response = set_user_color("Janek", 1)
     set_user_color("Timon", 2)

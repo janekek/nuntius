@@ -4,7 +4,7 @@ from src.utils.server_response import generate_response
 
 router = APIRouter()
 
-@router.get("/api/logout")
+@router.get("/logout")
 async def handle_logout(request: Request):
     request.session.clear() # Leert die Session (äquivalent zu session.destroy)
     response = generate_response(Status.OK, "")

@@ -18,7 +18,7 @@ class SignupRequest(BaseModel):
     iv_private_key: str
     color_id: int
 
-@router.post("/api/signup")
+@router.post("/signup")
 async def handle_signup(request: Request, data: SignupRequest):
     if request.session.get("loggedIn"):
         return generate_response(Status.USER_LOGGED_IN, "")

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 router = APIRouter()
 
 
-@router.get("/api/settings")
+@router.get("/settings")
 async def search_user(request: Request):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
@@ -25,7 +25,7 @@ async def search_user(request: Request):
 class SettingsChatRequest(BaseModel):
     chat_id : int
 
-@router.post("/api/settingsChat")
+@router.post("/settingsChat")
 async def search_user(request: Request, data: SettingsChatRequest):
     if not request.session or not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")

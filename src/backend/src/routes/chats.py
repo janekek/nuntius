@@ -5,7 +5,7 @@ from src.database.databaseOperations import get_all_full_chats_of_user
 
 router = APIRouter()
 
-@router.get("/api/chats")
+@router.get("/chats")
 async def handle_chats(request: Request):
     if not request.session.get("loggedIn"):
         return generate_response(Status.USER_NOT_LOGGED_IN, "")
