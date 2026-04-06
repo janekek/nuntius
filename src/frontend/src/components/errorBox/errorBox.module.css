@@ -1,0 +1,16 @@
+.errorBox {
+  background-color: rgba(190, 21, 21, 0.1);
+  border-left: 4px solid var(--col-warning);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+.errorText {
+  margin: 0;
+  /* color: var(--col-warning); */
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.4;
+
+  color: #ffb3b3;
+}

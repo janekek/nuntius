@@ -1,5 +1,3 @@
-import type { Response } from "express";
-import { json } from "node:stream/consumers";
 import type { FullChat } from "./types";
 
 export default interface ServerResponse<T> {
@@ -39,4 +37,11 @@ export interface ChatsPackage {
   chats: FullChat[];
 }
 
-export interface LoginPackage {}
+export interface SilentResponse {
+  emptyString: string;
+}
+
+export interface SearchMatch {
+  username: string;
+  color_id: number;
+}
