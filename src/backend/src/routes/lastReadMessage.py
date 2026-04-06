@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Request
-import hashlib
 from src.utils.status import Status
 from src.utils.server_response import generate_response
-from src.database.databaseOperations import check_credentials
 from pydantic import BaseModel
 
-from src.database.databaseOperations import create_chat_with_users, get_user_last_read_message
+from src.database.databaseOperations import get_user_last_read_message
 
 router = APIRouter()
 

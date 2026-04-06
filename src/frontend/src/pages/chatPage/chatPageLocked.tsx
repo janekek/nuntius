@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
 import CustomButton from "../../components/customButton/CustomButton";
 import ErrorBox from "../../components/errorBox/errorBox";
-import Footer from "../../components/footer/footer";
 import Input from "../../components/input/Input";
-import SinglePageContainer from "../../components/singlePageContainer/singlePageContainer";
 import styles from "./chatPageLocked.module.css";
 import SiteContainer from "../../components/siteContainer/siteContainer";
 import MainMiddleComponent from "../../components/mainMiddleComponent/mainMiddleComponent";

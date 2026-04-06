@@ -1,13 +1,11 @@
 import React from "react";
-import styles from "./errorBox.module.css"; // Pfad zu deinen Styles
-
+import styles from "./errorBox.module.css";
 interface ErrorBoxProps {
   children: React.ReactNode;
   variant?: "error" | "warning" | "info";
 }
 
 const ErrorBox: React.FC<ErrorBoxProps> = ({ children, variant = "error" }) => {
-  // Nur rendern, wenn children vorhanden sind (nicht null, undefined oder leerer String)
   if (!children) return null;
 
   return (

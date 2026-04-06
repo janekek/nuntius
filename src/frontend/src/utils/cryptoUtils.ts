@@ -17,34 +17,33 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
-// --- HYBRID VERSCHLÜSSELUNG (Senden) ---
+// --- hybride encryption ---
 export async function encryptHybrid(
   messageText: string,
   participantKeys: { username: string; public_key: string }[],
 ) {
-  // 1. Generiere einen einmaligen AES-GCM Key (Session Key)
+  // Generiere einmaligen AES-GCM Key (Session Key)
   const aesKey = await window.crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
-    true, // muss exportierbar sein, damit wir ihn mit RSA verschlüsseln können
+    true, // muss exportierbar sein
     ["encrypt", "decrypt"],
   );
 
-  // 2. Verschlüssele die eigentliche Nachricht mit AES
+  // Verschlüsselung der eigentlichen Nachricht mit AES
   const encoder = new TextEncoder();
-  const iv = window.crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector
+  const iv = window.crypto.getRandomValues(new Uint8Array(12)); // iv... Initialization Vector
   const encryptedContentBuffer = await window.crypto.subtle.encrypt(
     { name: "AES-GCM", iv: iv },
     aesKey,
     encoder.encode(messageText),
   );
 
-  // 3. Exportiere den AES Key, um ihn einpacken zu können
+  // Exportieren des AES Key
   const exportedAesKey = await window.crypto.subtle.exportKey("raw", aesKey);
 
-  // 4. Verschlüssele den AES Key für jeden Teilnehmer mit dessen RSA Public Key
+  // Verschlüsselung den AES Key für jeden Teilnehmer mit dessen RSA Public Key
   const keysPayload = await Promise.all(
     participantKeys.map(async (participant) => {
-      // Den JWK-String aus der Datenbank in ein CryptoKey Objekt umwandeln
       const publicKeyJwk = JSON.parse(participant.public_key);
       const rsaPubKey = await window.crypto.subtle.importKey(
         "jwk",
@@ -75,14 +74,13 @@ export async function encryptHybrid(
   };
 }
 
-// --- HYBRID ENTSCHLÜSSELUNG (Empfangen) ---
+// --- hybride entschlüsselung (Empfangen) ---
 export async function decryptHybrid(
   encryptedContentBase64: string,
   ivBase64: string,
   encryptedSymKeyBase64: string,
-  privateKeyJwk: any, // Aus der SessionStorage
+  privateKeyJwk: any,
 ) {
-  // 1. Importiere den EIGENEN Private Key
   const privateKey = await window.crypto.subtle.importKey(
     "jwk",
     privateKeyJwk,
@@ -91,7 +89,6 @@ export async function decryptHybrid(
     ["decrypt"],
   );
 
-  // 2. Entschlüssele den AES Key
   const encryptedSymKeyBuffer = base64ToArrayBuffer(encryptedSymKeyBase64);
   const rawAesKey = await window.crypto.subtle.decrypt(
     { name: "RSA-OAEP" },
@@ -99,7 +96,6 @@ export async function decryptHybrid(
     encryptedSymKeyBuffer,
   );
 
-  // 3. Importiere den entschlüsselten AES Key als CryptoKey
   const aesKey = await window.crypto.subtle.importKey(
     "raw",
     rawAesKey,
@@ -108,7 +104,6 @@ export async function decryptHybrid(
     ["decrypt"],
   );
 
-  // 4. Entschlüssele den eigentlichen Text
   const encryptedContentBuffer = base64ToArrayBuffer(encryptedContentBase64);
   const ivBuffer = base64ToArrayBuffer(ivBase64);
   const decryptedContentBuffer = await window.crypto.subtle.decrypt(
@@ -132,7 +127,7 @@ export async function generateKeyPairFromPassword(
       publicExponent: new Uint8Array([1, 0, 1]),
       hash: "SHA-256",
     },
-    true, // muss true sein, damit wir ihn exportieren und speichern können
+    true, // exportierbar
     ["encrypt", "decrypt"],
   );
 
@@ -148,16 +143,9 @@ export async function generateKeyPairFromPassword(
   return { publicKey: publicKeyJwk, privateKey: privateKeyJwk };
 }
 
-/**
- * Nimmt dein Secret Password und den Usernamen (als Salt) und
- * berechnet daraus einen extrem starken AES-GCM Schlüssel (256-bit).
- * Dieser Schlüssel wird dann genutzt, um den Private Key zu verschlüsseln (beim Signup)
- * oder wieder zu entsperren (auf der Chat-Seite).
- */
 export async function deriveKeyFromPassword(password: string, salt: string) {
   const encoder = new TextEncoder();
 
-  // 1. Passwort in ein "rohes" Schlüsselmaterial umwandeln
   const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
@@ -166,17 +154,17 @@ export async function deriveKeyFromPassword(password: string, salt: string) {
     ["deriveBits", "deriveKey"],
   );
 
-  // 2. Mit PBKDF2 (100.000 Iterationen) einen starken AES-Key ableiten
+  // Mit PBKDF2 (100.000 Iterationen) einen starken AES-Key ableiten
   return window.crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: encoder.encode(salt), // Macht den Key einzigartig für diesen User
-      iterations: 100000, // Schützt vor Brute-Force-Angriffen
+      salt: encoder.encode(salt), // salt mit username
+      iterations: 100000,
       hash: "SHA-256",
     },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
-    false, // Dieser Key selbst darf den Browser nie verlassen
+    false,
     ["encrypt", "decrypt"],
   );
 }
@@ -187,7 +175,6 @@ export async function reWrapSessionKeysForNewUser(
   myPrivateKeyJwk: any,
   newUserPublicKeyString: string,
 ) {
-  // 1. Keys importieren
   const newUserKeyJwk = JSON.parse(newUserPublicKeyString);
   const newUserRsaPubKey = await window.crypto.subtle.importKey(
     "jwk",
@@ -206,14 +193,11 @@ export async function reWrapSessionKeysForNewUser(
 
   const newKeysPayload = [];
 
-  // 2. Über alte Nachrichten iterieren
   for (const msg of messages) {
-    // Finde meinen eigenen, verschlüsselten AES-Key für diese Nachricht
     const myKeyObj = msg.keys?.find((k: any) => k.username === myUsername);
-    if (!myKeyObj) continue; // Überspringen, falls ich die Nachricht selbst nicht lesen kann
+    if (!myKeyObj) continue;
 
     try {
-      // A) Entschlüsseln mit meinem Private Key
       const encryptedSymKeyBuffer = base64ToArrayBuffer(myKeyObj.encryptedKey);
       const rawAesKey = await window.crypto.subtle.decrypt(
         { name: "RSA-OAEP" },
@@ -221,14 +205,12 @@ export async function reWrapSessionKeysForNewUser(
         encryptedSymKeyBuffer,
       );
 
-      // B) Wieder verschlüsseln mit dem Public Key des NEUEN Users
       const newlyEncryptedSymKeyBuffer = await window.crypto.subtle.encrypt(
         { name: "RSA-OAEP" },
         newUserRsaPubKey,
         rawAesKey,
       );
 
-      // C) Speichern für das Backend-Payload
       newKeysPayload.push({
         message_id: msg.id,
         encrypted_sym_key: arrayBufferToBase64(newlyEncryptedSymKeyBuffer),

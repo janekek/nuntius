@@ -24,7 +24,6 @@
   color: #000;
 }
 
-/* Settings Items (Kopiert aus der SettingsPage und angepasst) */
 .settingItem,
 .settingItemDanger {
   display: flex;

@@ -1,5 +1,5 @@
 .errorBox {
-  background-color: rgba(190, 21, 21, 0.1); /* Transparentes col-warning */
+  background-color: rgba(190, 21, 21, 0.1);
   border-left: 4px solid var(--col-warning);
   padding: 0.75rem 1rem;
   border-radius: 4px;
@@ -12,5 +12,5 @@
   font-weight: 500;
   line-height: 1.4;
 
-  color: #ffb3b3; /* Aufgehelltes Rot für bessere Lesbarkeit auf Dunkel */
+  color: #ffb3b3;
 }

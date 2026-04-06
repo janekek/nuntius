@@ -12,7 +12,7 @@ async def handle_send_message(sid, session, data, sio):
     chat_id = int(data.get("chatID"))
     encrypted_content = data.get("encryptedContent")
     iv = data.get("iv")
-    keys = data.get("keys") # list: [{"username": "Janek", "encryptedKey": "..."}, ...]
+    keys = data.get("keys")
 
     sender = session.get("username")
 
@@ -21,10 +21,10 @@ async def handle_send_message(sid, session, data, sio):
     if result["code"] == Status.OK.code:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Jeder Client filtert sich dann seinen Key aus dem Array heraus.
+        # jeder Client filtert sich seinen Key
         message_payload = {
             "id": result["message_id"],
-            "content": encrypted_content, # Wichtig: Heißt jetzt oft noch content im Frontend, enthält aber den Ciphertext
+            "content": encrypted_content,
             "iv": iv,
             "keys": keys,
             "sender_username": sender,

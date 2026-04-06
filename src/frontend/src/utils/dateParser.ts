@@ -30,7 +30,6 @@ export function formatSmartDate(dateString: string): string {
   if (isYesterday) return `Gestern, ${timeString}`;
   if (isTwoDaysAgo) return `Vorgestern, ${timeString}`;
 
-  // Ist es weniger als eine Woche her? Dann Wochentag.
   const diffTime = Math.abs(now.getTime() - date.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   if (diffDays < 7) {
@@ -38,6 +37,5 @@ export function formatSmartDate(dateString: string): string {
     return `${weekday}, ${timeString}`;
   }
 
-  // Ansonsten volles Datum
   return `${date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}, ${timeString}`;
 }

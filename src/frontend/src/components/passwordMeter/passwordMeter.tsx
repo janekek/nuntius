@@ -1,7 +1,6 @@
 import styles from "./passwordMeter.module.css";
 
 export default function PasswordMeter({ password }: { password: string }) {
-  // Hilfsfunktion für die Stärke (0 bis 4)
   const calculateStrength = (pw: string) => {
     if (!pw) return 0;
     let strength = 0;
@@ -12,7 +11,6 @@ export default function PasswordMeter({ password }: { password: string }) {
     return strength;
   };
 
-  // ... in deiner SignUpPage.tsx unterhalb des Password-Inputs einfügen:
   const strength = calculateStrength(password);
   const colors = [
     "transparent",

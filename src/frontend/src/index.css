@@ -50,7 +50,7 @@
     transition: color 0.2s ease;
   }
   a:hover {
-    color: #79e334; /* Helleres Grün */
+    color: #79e334;
     text-decoration: underline;
   }
 }

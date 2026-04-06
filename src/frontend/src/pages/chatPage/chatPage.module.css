@@ -3,7 +3,6 @@
   height: calc(100vh - 190px);
   width: 100%;
   max-width: 800px;
-  /* height: 90vh; Nimmt fast die ganze Höhe ein */
   background-color: var(--bg-dark-surface);
   flex-grow: 1;
   border-radius: 16px;
@@ -80,7 +79,7 @@
   margin-left: 0;
 }
 
-/* Chat Fenster (Scrollbereich) */
+/* Chat Fenster */
 .chatWindow {
   flex-grow: 1;
   overflow-y: auto;
@@ -91,7 +90,6 @@
   background-color: var(--bg-dark-main);
 }
 
-/* Dieser Spacer sorgt dafür, dass wenige Nachrichten ganz unten anliegen */
 .messageSpacer {
   margin-top: auto;
 }
@@ -165,11 +163,11 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* Input Area (Unten fixiert) */
+/* Input Area */
 .inputArea {
   display: flex;
 
-  align-items: center; /* Wichtig, falls Input mehrzeilig wird */
+  align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
   background-color: var(--bg-dark-surface);
@@ -227,16 +225,15 @@
 
 .receipt {
   font-size: 0.7rem;
-  color: var(--text-muted); /* Standard für gesendet (✓) */
+  color: var(--text-muted);
 }
 
-/* Wir nutzen eine CSS-Klasse, falls du "✓✓" renderst */
 .receiptRead {
-  color: #4dabf7; /* Ein klassisches Messenger-Blau für "Gelesen" */
+  color: #4dabf7;
 }
 
 .logoImage {
-  width: 16px; /* Oder wie groß du es haben möchtest */
+  width: 16px;
   height: 16px;
-  display: block; /* Stellt sicher, dass das Zentrieren funktioniert */
+  display: block;
 }

@@ -60,7 +60,6 @@
   border-radius: 8px;
 }
 
-/* Chat Karten */
 .chatList {
   display: flex;
   flex-direction: column;
@@ -147,7 +146,7 @@
 }
 
 .unreadBadge {
-  background-color: var(--col-warning); /* Das Rot passt hier perfekt */
+  background-color: var(--col-warning);
   color: white;
   font-size: 0.75rem;
   font-weight: bold;
@@ -158,7 +157,7 @@
 }
 
 .buttonBadge {
-  background-color: var(--col-warning); /* Das Rot passt hier perfekt */
+  background-color: var(--col-warning);
   color: white;
   font-size: 0.75rem;
   font-weight: bold;
@@ -167,7 +166,7 @@
   min-width: 20px;
   text-align: center;
 
-  position: absolute; /* Position the badge within the relatively positioned button */
+  position: absolute;
   top: 0;
   right: 0;
 }

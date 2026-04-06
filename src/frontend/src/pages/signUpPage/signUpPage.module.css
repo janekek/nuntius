@@ -1,4 +1,3 @@
-/* Info Text Box (Erklärung der Philosophie) */
 .infoBox {
   background-color: rgba(27, 48, 60, 0.3); /* Transparentes col-primary */
   border-radius: 12px;
@@ -29,7 +28,6 @@
   color: var(--text-main);
 }
 
-/* Formular Bereich */
 .formContainer {
   display: flex;
   flex-direction: column;
@@ -42,7 +40,6 @@
   gap: 1rem;
 }
 
-/* Aktionen (SignUp Button) */
 .actionArea {
   display: flex;
   flex-direction: column;

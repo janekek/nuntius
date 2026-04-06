@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "./static/css/main.af3ae28b.css",
+    "main.js": "./static/js/main.e73edd14.js",
+    "static/media/TeX.ttf": "./static/media/TeX.8ff5cee913df84291549.ttf",
+    "static/media/TeX-bold.ttf": "./static/media/TeX-bold.c97a73040fda7e3cb554.ttf",
+    "static/media/SourceCodePro-Regular.ttf": "./static/media/SourceCodePro-Regular.7f0d34afc9730f19a1af.ttf",
+    "static/media/Poppins-Regular.ttf": "./static/media/Poppins-Regular.35d26b781dc5fda684cc.ttf",
+    "static/media/Warzone.ttf": "./static/media/Warzone.ae1622c6d283324113f2.ttf",
+    "static/media/double-tick-2.png": "./static/media/double-tick-2.fbfbf53b03f1787162f2.png",
+    "index.html": "./index.html",
+    "main.af3ae28b.css.map": "./static/css/main.af3ae28b.css.map",
+    "main.e73edd14.js.map": "./static/js/main.e73edd14.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.af3ae28b.css",
+    "static/js/main.e73edd14.js"
+  ]
+}

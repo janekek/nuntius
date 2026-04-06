@@ -2,14 +2,13 @@ import styles from "./singlePageContainer.module.css";
 
 export default function SinglePageContainer({
   children,
-  style, // 1. Prop hinzufügen
+  style,
 }: {
   children: React.ReactNode;
-  style?: React.CSSProperties; // 2. Typisierung für React-Styles (optional durch das '?')
+  style?: React.CSSProperties;
 }) {
   return (
     <>
-      {/* 3. Style-Prop an das umschließende div weitergeben */}
       <div className={styles.container} style={style}>
         {children}
       </div>

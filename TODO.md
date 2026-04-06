@@ -18,3 +18,24 @@
 - change password ?
 
 - session cookie nicht mit username als identifikation!
+
+- settings: zurück-button
+- englisch im chat
+- sprache ändern
+- send message schnell hintereinander
+- chatId verbergen
+- nachrichten löschen nach gewisser zeit
+- chat/id chat kann man dort sehen; backroute
+- chat seite größer vom bild her
+- nuntius logo weg von den anderen seiten
+- erklärungseite verlinken bei der sign up page
+- scrollen auf der sign up page
+- welche invalid characters
+- password correktur gleich anzeigen
+- vielleicht nur ein passwort
+- username beim sign up: groß und kleinschreibung
+- enter drücken im "chat locked"
+- [BUG] man loggt sich ein, loggt isch aus, ertstllt neuen account, und wenn man sich dann einloggt chattet man mit dem alten account (viellcith websocket)
+- uhrzeit falsch
+- bilder, links schicken etc.
+- anzeigename setzen

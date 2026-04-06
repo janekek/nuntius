@@ -25,6 +25,6 @@ export class UserColor {
     const colors = this.getAllColors();
     const randomIndex = Math.floor(Math.random() * colors.length);
 
-    return colors[randomIndex]!.id; // Gibt die ID der zufällig gewählten Farbe zurück
+    return colors[randomIndex]!.id;
   }
 }

@@ -27,7 +27,6 @@ async def handle_single_chat(request: Request, chat_id: str = Path(...)):
     if not is_number(chat_id):
         return generate_response(Status.ERROR, "chat_id is not a number")
 
-    # HIER IST DIE ÄNDERUNG: Wir übergeben den current_user an get_full_chat
     full_chat = get_full_chat(int(chat_id), current_user)
 
     return generate_response(Status.OK, {
@@ -81,8 +80,6 @@ async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserR
     current_user = request.session.get("username")
 
     try:
-        # 1. Prüfen ob der Ausführende überhaupt im Chat ist
-        # SQLAlchemy Query: Finde den ersten Eintrag, der auf die Bedingungen passt
         is_in_chat = db.query(ChatParticipant).filter(
             ChatParticipant.chat_id == chat_id,
             ChatParticipant.username == current_user
@@ -91,12 +88,10 @@ async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserR
         if not is_in_chat:
             return generate_response(Status.ERROR, "Du bist nicht in diesem Chat!")
 
-        # 2. Prüfen ob der neue User existiert
         user_to_add = db.query(User).filter(User.username == data.new_username).first()
         if not user_to_add:
             return generate_response(Status.ERROR, "Benutzer existiert nicht.")
 
-        # 3. User dem Chat hinzufügen (ignorieren, falls er schon drin ist)
         already_in_chat = db.query(ChatParticipant).filter(
             ChatParticipant.chat_id == chat_id,
             ChatParticipant.username == data.new_username
@@ -106,30 +101,22 @@ async def handle_add_user_to_chat(request: Request, chat_id: int, data: AddUserR
             new_participant = ChatParticipant(
                 chat_id=chat_id,
                 username=data.new_username,
-                # Wir können direkt die Standard-Einstellung des Users aus der DB übernehmen!
                 send_read_receipts=user_to_add.send_read_receipts_default 
             )
             db.add(new_participant)
 
-        # 4. Historische Schlüssel für den neuen User abspeichern
         for key_data in data.historic_keys:
             new_key = MessageKey(
                 message_id=key_data["message_id"],
                 username=data.new_username,
                 encrypted_sym_key=key_data["encrypted_sym_key"]
             )
-            # db.merge() verhält sich in SQLAlchemy ähnlich wie "INSERT OR IGNORE" bzw. "UPSERT" in SQL.
-            # Wenn die Kombination aus message_id und username schon existiert, wird sie überschrieben.
-            # Wenn sie neu ist, wird sie hinzugefügt. Das verhindert Primary-Key-Crashes.
             db.merge(new_key)
         
-        # 5. Änderungen in die Datenbank schreiben
         db.commit()
         return generate_response(Status.OK, "User erfolgreich hinzugefügt und Historie geteilt.")
 
     except Exception as e:
-        # GANZ WICHTIG in SQLAlchemy: Wenn ein Fehler passiert, MÜSSEN wir die 
-        # Transaktion zurückrollen, sonst bleibt die Session in einem fehlerhaften Zustand!
         db.rollback()
         print("Fehler beim Hinzufügen zum Chat:", e)
         return generate_response(Status.ERROR, "Interner Datenbankfehler.")
@@ -157,7 +144,6 @@ async def handle_delete_account(request: Request):
     
     try:
         delete_user_account(current_user)
-        # Session leeren
         request.session.clear()
         
         return generate_response(Status.OK, "")

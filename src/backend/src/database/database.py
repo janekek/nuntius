@@ -6,7 +6,7 @@ from sqlalchemy.engine import Engine
 
 Base = declarative_base()
 
-# Verbindung zur SQLite DB
+# Verbindung zu SQLite DB
 engine = create_engine("sqlite:///database/chat.db", connect_args={"check_same_thread": False})
 
 @event.listens_for(Engine, "connect")
@@ -52,7 +52,7 @@ class Message(Base):
     sender_username = Column(String, ForeignKey("users.username"))
     encrypted_content = Column(String, nullable=False)
     iv = Column(String, nullable=False)
-    timestamp = Column(DateTime, server_default=func.now()) # Entspricht CURRENT_TIMESTAMP
+    timestamp = Column(DateTime, server_default=func.now()) # CURRENT_TIMESTAMP
 
 class MessageKey(Base):
     __tablename__ = "message_keys"
@@ -61,7 +61,7 @@ class MessageKey(Base):
     username = Column(String, ForeignKey("users.username", ondelete="CASCADE"), primary_key=True)
     encrypted_sym_key = Column(String, nullable=False)
 
-    # Erstellt alle Tabellen, falls sie noch nicht existieren
+# Erstelle alle Tabellen, falls sie noch nicht existieren
 Base.metadata.create_all(bind=engine)
 
 db = SessionLocal()

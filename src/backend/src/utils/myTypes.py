@@ -7,7 +7,7 @@ class EnhancedUser(BaseModel):
     username: str
     password_hash: str
     public_key: str
-    encrypted_private_key: str # NEU
+    encrypted_private_key: str 
     iv_private_key: str
     color_id: int
 
@@ -20,9 +20,9 @@ class Message(BaseModel):
 class Message(BaseModel):
     id: int
     sender_username: str
-    content: str  # (encrypted_content)
-    iv: str       # Initialization Vector für AES
-    keys: List[Dict[str, str]] # Liste mit Schlüsseln
+    content: str  
+    iv: str      
+    keys: List[Dict[str, str]]
     timestamp: str
 
 class FullChat(BaseModel):

@@ -94,7 +94,7 @@ function ChatPage() {
     }
   }, [isLoading, isUnlocked, chat]);
 
-  // 1. Chat-Historie von API laden
+  // Chat-Historie von API laden
   useEffect(() => {
     if (isSuccess && data) {
       if (data.status.code === Status.OK.code) {
@@ -106,7 +106,7 @@ function ChatPage() {
     }
   }, [data, isSuccess, navigate]);
 
-  // 2. Historie entschlüsseln (sobald entsperrt)
+  //  Historie entschlüsseln (sobald entsperrt)
   useEffect(() => {
     if (isUnlocked && rawChatData && privateKeyJwk && currentUsername) {
       const processHistory = async () => {
@@ -136,7 +136,6 @@ function ChatPage() {
     }
   }, [isUnlocked, rawChatData, privateKeyJwk, currentUsername]);
 
-  // 3. Socket Event Handling (Live-Nachrichten)
   useEffect(() => {
     if (!isUnlocked || !privateKeyJwk || !currentUsername) return;
 
@@ -174,14 +173,13 @@ function ChatPage() {
     };
   }, [chatID, isUnlocked, privateKeyJwk, currentUsername]);
 
-  // --- DER ENTSPERR-VORGANG (Zieht die Daten jetzt vom Server!) ---
   const handleUnlock = async () => {
     if (!secretPassword) return;
     setUnlockError("");
     setUnlocking(true);
 
     try {
-      // Hole den verschlüsselten Private Key aus der Datenbank
+      // verschlüsselten Private Key aus DB holen
       const keysRes: any = await callAPI("/user/keys", { method: "GET" });
 
       if (keysRes.status.code !== 100) {
@@ -206,10 +204,9 @@ function ChatPage() {
         base64ToArrayBuffer(encPrivBase64),
       );
 
-      // JSON in nutzbares Format parsen
       const rawKey = JSON.parse(new TextDecoder().decode(decryptedBuffer));
       setPrivateKeyJwk(rawKey);
-      setIsUnlocked(true); // Chat öffnet sich
+      setIsUnlocked(true);
     } catch (err) {
       console.error(err);
       setUnlockError("Incorrect password. Access denied.");
@@ -345,7 +342,7 @@ function ChatPage() {
                       (p) => m.id <= p.last_read_message_id,
                     );
                     if (isReadByAll) {
-                      show_is_read = true; // Nachricht wurde von allen anderen gelesen
+                      show_is_read = true;
                     }
                   }
                 }
@@ -399,8 +396,6 @@ function ChatPage() {
                   onChange={setChatMessage}
                   forceShowError={showAllErrors}
                   onEnter={submitChat}
-                  // Falls dein CorrectableInput eine className Prop nimmt, übergib hier eine:
-                  // className={styles.textInput}
                 />
               </div>
               <button onClick={submitChat}>Send</button>
@@ -408,7 +403,6 @@ function ChatPage() {
           </>
         )}
       </div>
-      {/* STICKY FOOTER */}
       <StickyFooter
         maxWidth="800px"
         navigator={navigate}

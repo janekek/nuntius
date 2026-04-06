@@ -1,6 +1,4 @@
-import { Link } from "react-router-dom";
 import Footer from "../footer/footer";
-import SinglePageContainer from "../singlePageContainer/singlePageContainer";
 import styles from "./mainMiddleComponent.module.css";
 
 export default function MainMiddleComponent({

@@ -29,7 +29,7 @@ app.add_middleware(
     session_cookie=SESSION_COOKIE_NAME,
     max_age=1000 * 60 * 60 * 24, # 24 hrs
     same_site="none",  #  Erlaubt Cross-Domain Cookies
-    https_only=True,    #   Pflicht, wenn same_site="none"
+    https_only=True, 
 )
 
 origins = [
