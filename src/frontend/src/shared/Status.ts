@@ -48,10 +48,30 @@ export class Status {
     msg: "The password are not allowed to match",
     code: 404,
   };
+  static readonly USERNAME_INVALID: StatusDetail = {
+    msg: "The username contains invalid characters",
+    code: 405,
+  };
+  static readonly PASSWORD_WEAK: StatusDetail = {
+    msg: "The password does not meet the security requirements",
+    code: 406,
+  };
+  static readonly PASSWORD_INVALID: StatusDetail = {
+    msg: "The password contains invalid characters",
+    code: 407,
+  };
+  static readonly USERNAME_TOO_LONG: StatusDetail = {
+    msg: "The username is too long",
+    code: 408,
+  };
 
   //Chats
   static readonly CHAT_NOT_FOUND: StatusDetail = {
     msg: "The requested chat does not exist",
-    code: 401,
+    code: 501,
+  };
+  static readonly CHAT_ALREADY_EXISTS: StatusDetail = {
+    msg: "The requested chat already exists",
+    code: 502,
   };
 }

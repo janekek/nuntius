@@ -2,6 +2,7 @@ export interface EnhancedUser {
   username: string;
   password_hash: string;
   public_key: string;
+  color_id: number;
 }
 
 export interface Chat {
@@ -10,12 +11,13 @@ export interface Chat {
 }
 
 export interface ChatParticipant {
-  chat_id: number;
   username: string;
+  last_read_message_id: number;
+  color_id: number;
 }
 
 export interface Message {
-  id?: number;
+  id: number;
   chat_id?: number;
   sender_username: string;
   content: string;
@@ -25,6 +27,8 @@ export interface Message {
 export interface FullChat {
   chat_id: number;
   chat_name: string | null;
-  participants: string[];
+  participants: ChatParticipant[];
   messages: Message[];
+  last_read_message_id: number;
+  unread_count: number;
 }

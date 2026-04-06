@@ -1,3 +1,41 @@
 - use another encryting algorithm (sha is too fast), bcrypt
-- Soll ich dir zeigen, wie du eine Middleware schreibst, die bei jeder Anfrage prüft, ob die Session noch aktiv ist, bevor eine Route (z.B. /api/chat) ausgeführt wird?
 - types/session.d.ts global machen?
+- [DONE] tailwind
+- [INFO] callAPIHook >> geändert
+- enum TRANS
+- [DONE] AI implement
+- [DONE] backend in python
+- [INFO] react router, frontend -> createBrowserRouter, es wird parallel zum Laden der Website eine Funktion gecallt, die resourcenintensive Prozesse druchführt (fetching). Damit verhinder man Data-Waterfall durch z.b. useEffect()
+- [DONE] tanstack query, frontend
+- [DONE] zod (erkenne links in chats), frontend
+- erkenne links in chats
+
+- jwt token, backend
+
+- [DONE] frontend: check if secret passwiord and normal password doesnt match
+- [DONE] front/back: hast the normal password in frontend, not backend
+- methods: PBKDF2, AES-GCM,Session Key (AES), RSA-2048, AES-256-GCM, SQLAlchemie
+- change password ?
+
+- session cookie nicht mit username als identifikation!
+
+- settings: zurück-button
+- englisch im chat
+- sprache ändern
+- send message schnell hintereinander
+- chatId verbergen
+- nachrichten löschen nach gewisser zeit
+- chat/id chat kann man dort sehen; backroute
+- chat seite größer vom bild her
+- nuntius logo weg von den anderen seiten
+- erklärungseite verlinken bei der sign up page
+- scrollen auf der sign up page
+- welche invalid characters
+- password correktur gleich anzeigen
+- vielleicht nur ein passwort
+- username beim sign up: groß und kleinschreibung
+- enter drücken im "chat locked"
+- [BUG] man loggt sich ein, loggt isch aus, ertstllt neuen account, und wenn man sich dann einloggt chattet man mit dem alten account (viellcith websocket)
+- uhrzeit falsch
+- bilder, links schicken etc.
+- anzeigename setzen

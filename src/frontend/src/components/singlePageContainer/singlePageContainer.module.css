@@ -1,0 +1,11 @@
+.container {
+  background-color: var(--bg-dark-surface);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: fit-content;
+}

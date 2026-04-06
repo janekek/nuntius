@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: ./src/backend
+    restart: always
+    volumes:
+      - ./src/backend/database:/app/database
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./src/frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
